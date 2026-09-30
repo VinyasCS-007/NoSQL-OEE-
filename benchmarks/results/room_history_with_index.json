@@ -1,0 +1,182 @@
+{
+  "explainVersion": "1",
+  "queryPlanner": {
+    "namespace": "oee_chat_bench.messages",
+    "parsedQuery": {
+      "room_id": {
+        "$eq": {
+          "$oid": "6abd371dcfbb3c284875fd06"
+        }
+      }
+    },
+    "indexFilterSet": false,
+    "queryHash": "245A1E31",
+    "planCacheShapeHash": "245A1E31",
+    "planCacheKey": "42F82361",
+    "optimizationTimeMillis": 15,
+    "maxIndexedOrSolutionsReached": false,
+    "maxIndexedAndSolutionsReached": false,
+    "maxScansToExplodeReached": false,
+    "prunedSimilarIndexes": false,
+    "winningPlan": {
+      "isCached": false,
+      "stage": "LIMIT",
+      "limitAmount": 50,
+      "inputStage": {
+        "stage": "FETCH",
+        "nss": "oee_chat_bench.messages",
+        "inputStage": {
+          "stage": "IXSCAN",
+          "nss": "oee_chat_bench.messages",
+          "keyPattern": {
+            "room_id": 1,
+            "created_at": -1,
+            "_id": -1
+          },
+          "indexName": "room_recent",
+          "isMultiKey": false,
+          "multiKeyPaths": {
+            "room_id": [],
+            "created_at": [],
+            "_id": []
+          },
+          "isUnique": false,
+          "isSparse": false,
+          "isPartial": false,
+          "indexVersion": 2,
+          "direction": "forward",
+          "indexBounds": {
+            "room_id": [
+              "[ObjectId('6abd371dcfbb3c284875fd06'), ObjectId('6abd371dcfbb3c284875fd06')]"
+            ],
+            "created_at": [
+              "[MaxKey, MinKey]"
+            ],
+            "_id": [
+              "[MaxKey, MinKey]"
+            ]
+          }
+        }
+      }
+    },
+    "rejectedPlans": []
+  },
+  "executionStats": {
+    "executionSuccess": true,
+    "nReturned": 50,
+    "executionTimeMillis": 47,
+    "totalKeysExamined": 50,
+    "totalDocsExamined": 50,
+    "executionStages": {
+      "isCached": false,
+      "stage": "LIMIT",
+      "nReturned": 50,
+      "executionTimeMillisEstimate": 31,
+      "works": 51,
+      "advanced": 50,
+      "needTime": 0,
+      "needYield": 0,
+      "saveState": 1,
+      "restoreState": 1,
+      "isEOF": 1,
+      "limitAmount": 50,
+      "inputStage": {
+        "stage": "FETCH",
+        "nReturned": 50,
+        "executionTimeMillisEstimate": 31,
+        "works": 50,
+        "advanced": 50,
+        "needTime": 0,
+        "needYield": 0,
+        "saveState": 1,
+        "restoreState": 1,
+        "isEOF": 0,
+        "nss": "oee_chat_bench.messages",
+        "docsExamined": 50,
+        "alreadyHasObj": 0,
+        "inputStage": {
+          "stage": "IXSCAN",
+          "nReturned": 50,
+          "executionTimeMillisEstimate": 31,
+          "works": 50,
+          "advanced": 50,
+          "needTime": 0,
+          "needYield": 0,
+          "saveState": 1,
+          "restoreState": 1,
+          "isEOF": 0,
+          "nss": "oee_chat_bench.messages",
+          "keyPattern": {
+            "room_id": 1,
+            "created_at": -1,
+            "_id": -1
+          },
+          "indexName": "room_recent",
+          "isMultiKey": false,
+          "multiKeyPaths": {
+            "room_id": [],
+            "created_at": [],
+            "_id": []
+          },
+          "isUnique": false,
+          "isSparse": false,
+          "isPartial": false,
+          "indexVersion": 2,
+          "direction": "forward",
+          "indexBounds": {
+            "room_id": [
+              "[ObjectId('6abd371dcfbb3c284875fd06'), ObjectId('6abd371dcfbb3c284875fd06')]"
+            ],
+            "created_at": [
+              "[MaxKey, MinKey]"
+            ],
+            "_id": [
+              "[MaxKey, MinKey]"
+            ]
+          },
+          "keysExamined": 50,
+          "seeks": 1,
+          "dupsTested": 0,
+          "dupsDropped": 0,
+          "peakTrackedMemBytes": 0
+        }
+      }
+    },
+    "allPlansExecution": []
+  },
+  "queryShapeHash": "EFDA835F72F2C863691C9DE1487200D621A4B522040465BF67D9FCA7CC315511",
+  "command": {
+    "find": "messages",
+    "filter": {
+      "room_id": {
+        "$oid": "6abd371dcfbb3c284875fd06"
+      }
+    },
+    "sort": {
+      "created_at": -1,
+      "_id": -1
+    },
+    "limit": 50,
+    "singleBatch": true,
+    "$db": "oee_chat_bench"
+  },
+  "serverInfo": {
+    "host": "LENOVO-THINKPAD",
+    "port": 27017,
+    "version": "8.3.11",
+    "gitVersion": "b8b83d6e6e1aed495578ad8c6f9234ad329c9955"
+  },
+  "serverParameters": {
+    "internalQueryFacetBufferSizeBytes": 104857600,
+    "internalDocumentSourceGroupMaxMemoryBytes": 104857600,
+    "internalQueryMaxBlockingSortMemoryUsageBytes": 104857600,
+    "internalDocumentSourceSetWindowFieldsMaxMemoryBytes": 104857600,
+    "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
+    "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
+    "internalQueryProhibitBlockingMergeOnMongoS": 0,
+    "internalQueryMaxAddToSetBytes": 104857600,
+    "internalQueryFrameworkControl": "trySbeRestricted",
+    "internalQueryPlannerIgnoreIndexWithCollationForRegex": 1
+  },
+  "ok": 1.0
+}

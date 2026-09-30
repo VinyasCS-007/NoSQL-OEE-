@@ -1,0 +1,88 @@
+{
+  "explainVersion": "1",
+  "queryPlanner": {
+    "namespace": "oee_chat_bench.users",
+    "parsedQuery": {
+      "email": {
+        "$eq": "user15000@example.com"
+      }
+    },
+    "indexFilterSet": false,
+    "queryHash": "2C2F10E4",
+    "planCacheShapeHash": "2C2F10E4",
+    "planCacheKey": "FAA42045",
+    "optimizationTimeMillis": 1,
+    "maxIndexedOrSolutionsReached": false,
+    "maxIndexedAndSolutionsReached": false,
+    "maxScansToExplodeReached": false,
+    "prunedSimilarIndexes": false,
+    "winningPlan": {
+      "isCached": false,
+      "stage": "COLLSCAN",
+      "filter": {
+        "email": {
+          "$eq": "user15000@example.com"
+        }
+      },
+      "nss": "oee_chat_bench.users",
+      "direction": "forward"
+    },
+    "rejectedPlans": []
+  },
+  "executionStats": {
+    "executionSuccess": true,
+    "nReturned": 1,
+    "executionTimeMillis": 38,
+    "totalKeysExamined": 0,
+    "totalDocsExamined": 20000,
+    "executionStages": {
+      "isCached": false,
+      "stage": "COLLSCAN",
+      "filter": {
+        "email": {
+          "$eq": "user15000@example.com"
+        }
+      },
+      "nReturned": 1,
+      "executionTimeMillisEstimate": 35,
+      "works": 20001,
+      "advanced": 1,
+      "needTime": 19999,
+      "needYield": 0,
+      "saveState": 2,
+      "restoreState": 2,
+      "isEOF": 1,
+      "nss": "oee_chat_bench.users",
+      "direction": "forward",
+      "docsExamined": 20000
+    },
+    "allPlansExecution": []
+  },
+  "queryShapeHash": "762B7D9D0E7A03E7A94151415542D5AA4BA9D1F92C117BDD41DBBB6CA339B863",
+  "command": {
+    "find": "users",
+    "filter": {
+      "email": "user15000@example.com"
+    },
+    "$db": "oee_chat_bench"
+  },
+  "serverInfo": {
+    "host": "LENOVO-THINKPAD",
+    "port": 27017,
+    "version": "8.3.11",
+    "gitVersion": "b8b83d6e6e1aed495578ad8c6f9234ad329c9955"
+  },
+  "serverParameters": {
+    "internalQueryFacetBufferSizeBytes": 104857600,
+    "internalDocumentSourceGroupMaxMemoryBytes": 104857600,
+    "internalQueryMaxBlockingSortMemoryUsageBytes": 104857600,
+    "internalDocumentSourceSetWindowFieldsMaxMemoryBytes": 104857600,
+    "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
+    "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
+    "internalQueryProhibitBlockingMergeOnMongoS": 0,
+    "internalQueryMaxAddToSetBytes": 104857600,
+    "internalQueryFrameworkControl": "trySbeRestricted",
+    "internalQueryPlannerIgnoreIndexWithCollationForRegex": 1
+  },
+  "ok": 1.0
+}

@@ -1,0 +1,216 @@
+{
+  "explainVersion": "1",
+  "queryPlanner": {
+    "namespace": "oee_chat_bench.messages",
+    "parsedQuery": {
+      "$and": [
+        {
+          "room_id": {
+            "$eq": {
+              "$oid": "6abd371dcfbb3c284875fd06"
+            }
+          }
+        },
+        {
+          "$text": {
+            "$search": "pizza",
+            "$language": "english",
+            "$caseSensitive": false,
+            "$diacriticSensitive": false
+          }
+        }
+      ]
+    },
+    "indexFilterSet": false,
+    "queryHash": "21911658",
+    "planCacheShapeHash": "21911658",
+    "planCacheKey": "5D1776E0",
+    "optimizationTimeMillis": 19,
+    "maxIndexedOrSolutionsReached": false,
+    "maxIndexedAndSolutionsReached": false,
+    "maxScansToExplodeReached": false,
+    "prunedSimilarIndexes": false,
+    "winningPlan": {
+      "isCached": false,
+      "stage": "FETCH",
+      "filter": {
+        "room_id": {
+          "$eq": {
+            "$oid": "6abd371dcfbb3c284875fd06"
+          }
+        }
+      },
+      "nss": "oee_chat_bench.messages",
+      "inputStage": {
+        "stage": "TEXT_MATCH",
+        "nss": "oee_chat_bench.messages",
+        "indexPrefix": {},
+        "indexName": "text_search",
+        "parsedTextQuery": {
+          "terms": [
+            "pizza"
+          ],
+          "negatedTerms": [],
+          "phrases": [],
+          "negatedPhrases": []
+        },
+        "textIndexVersion": 3,
+        "inputStage": {
+          "stage": "FETCH",
+          "nss": "oee_chat_bench.messages",
+          "inputStage": {
+            "stage": "IXSCAN",
+            "nss": "oee_chat_bench.messages",
+            "keyPattern": {
+              "_fts": "text",
+              "_ftsx": 1
+            },
+            "indexName": "text_search",
+            "isMultiKey": true,
+            "isUnique": false,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "backward",
+            "indexBounds": {}
+          }
+        }
+      }
+    },
+    "rejectedPlans": []
+  },
+  "executionStats": {
+    "executionSuccess": true,
+    "nReturned": 473,
+    "executionTimeMillis": 227,
+    "totalKeysExamined": 22907,
+    "totalDocsExamined": 45814,
+    "executionStages": {
+      "isCached": false,
+      "stage": "FETCH",
+      "filter": {
+        "room_id": {
+          "$eq": {
+            "$oid": "6abd371dcfbb3c284875fd06"
+          }
+        }
+      },
+      "nReturned": 473,
+      "executionTimeMillisEstimate": 189,
+      "works": 22908,
+      "advanced": 473,
+      "needTime": 22434,
+      "needYield": 0,
+      "saveState": 12,
+      "restoreState": 12,
+      "isEOF": 1,
+      "nss": "oee_chat_bench.messages",
+      "docsExamined": 22907,
+      "alreadyHasObj": 22907,
+      "inputStage": {
+        "stage": "TEXT_MATCH",
+        "nReturned": 22907,
+        "executionTimeMillisEstimate": 166,
+        "works": 22908,
+        "advanced": 22907,
+        "needTime": 0,
+        "needYield": 0,
+        "saveState": 12,
+        "restoreState": 12,
+        "isEOF": 1,
+        "nss": "oee_chat_bench.messages",
+        "indexPrefix": {},
+        "indexName": "text_search",
+        "parsedTextQuery": {
+          "terms": [
+            "pizza"
+          ],
+          "negatedTerms": [],
+          "phrases": [],
+          "negatedPhrases": []
+        },
+        "textIndexVersion": 3,
+        "docsRejected": 0,
+        "inputStage": {
+          "stage": "FETCH",
+          "nReturned": 22907,
+          "executionTimeMillisEstimate": 156,
+          "works": 22908,
+          "advanced": 22907,
+          "needTime": 0,
+          "needYield": 0,
+          "saveState": 12,
+          "restoreState": 12,
+          "isEOF": 1,
+          "nss": "oee_chat_bench.messages",
+          "docsExamined": 22907,
+          "alreadyHasObj": 0,
+          "inputStage": {
+            "stage": "IXSCAN",
+            "nReturned": 22907,
+            "executionTimeMillisEstimate": 114,
+            "works": 22908,
+            "advanced": 22907,
+            "needTime": 0,
+            "needYield": 0,
+            "saveState": 12,
+            "restoreState": 12,
+            "isEOF": 1,
+            "nss": "oee_chat_bench.messages",
+            "keyPattern": {
+              "_fts": "text",
+              "_ftsx": 1
+            },
+            "indexName": "text_search",
+            "isMultiKey": true,
+            "isUnique": false,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "backward",
+            "indexBounds": {},
+            "keysExamined": 22907,
+            "seeks": 1,
+            "dupsTested": 22907,
+            "dupsDropped": 0,
+            "peakTrackedMemBytes": 216022
+          }
+        }
+      }
+    },
+    "allPlansExecution": []
+  },
+  "queryShapeHash": "776139F1DAAF4B5890E62CCC5F494908B4CAD00458114A841BACCB3171A3D806",
+  "peakTrackedMemBytes": 216022,
+  "command": {
+    "find": "messages",
+    "filter": {
+      "room_id": {
+        "$oid": "6abd371dcfbb3c284875fd06"
+      },
+      "$text": {
+        "$search": "pizza"
+      }
+    },
+    "$db": "oee_chat_bench"
+  },
+  "serverInfo": {
+    "host": "LENOVO-THINKPAD",
+    "port": 27017,
+    "version": "8.3.11",
+    "gitVersion": "b8b83d6e6e1aed495578ad8c6f9234ad329c9955"
+  },
+  "serverParameters": {
+    "internalQueryFacetBufferSizeBytes": 104857600,
+    "internalDocumentSourceGroupMaxMemoryBytes": 104857600,
+    "internalQueryMaxBlockingSortMemoryUsageBytes": 104857600,
+    "internalDocumentSourceSetWindowFieldsMaxMemoryBytes": 104857600,
+    "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
+    "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
+    "internalQueryProhibitBlockingMergeOnMongoS": 0,
+    "internalQueryMaxAddToSetBytes": 104857600,
+    "internalQueryFrameworkControl": "trySbeRestricted",
+    "internalQueryPlannerIgnoreIndexWithCollationForRegex": 1
+  },
+  "ok": 1.0
+}

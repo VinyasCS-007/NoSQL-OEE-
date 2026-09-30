@@ -1,0 +1,130 @@
+{
+  "explainVersion": "1",
+  "queryPlanner": {
+    "namespace": "oee_chat_bench.messages",
+    "parsedQuery": {
+      "$and": [
+        {
+          "room_id": {
+            "$eq": {
+              "$oid": "6abd371dcfbb3c284875fd06"
+            }
+          }
+        },
+        {
+          "text": {
+            "$regex": "\\bpizza\\b",
+            "$options": "i"
+          }
+        }
+      ]
+    },
+    "indexFilterSet": false,
+    "queryHash": "5F97F297",
+    "planCacheShapeHash": "5F97F297",
+    "planCacheKey": "D8B900E9",
+    "optimizationTimeMillis": 15,
+    "maxIndexedOrSolutionsReached": false,
+    "maxIndexedAndSolutionsReached": false,
+    "maxScansToExplodeReached": false,
+    "prunedSimilarIndexes": false,
+    "winningPlan": {
+      "isCached": false,
+      "stage": "COLLSCAN",
+      "filter": {
+        "$and": [
+          {
+            "room_id": {
+              "$eq": {
+                "$oid": "6abd371dcfbb3c284875fd06"
+              }
+            }
+          },
+          {
+            "text": {
+              "$regex": "\\bpizza\\b",
+              "$options": "i"
+            }
+          }
+        ]
+      },
+      "nss": "oee_chat_bench.messages",
+      "direction": "forward"
+    },
+    "rejectedPlans": []
+  },
+  "executionStats": {
+    "executionSuccess": true,
+    "nReturned": 473,
+    "executionTimeMillis": 201,
+    "totalKeysExamined": 0,
+    "totalDocsExamined": 100000,
+    "executionStages": {
+      "isCached": false,
+      "stage": "COLLSCAN",
+      "filter": {
+        "$and": [
+          {
+            "room_id": {
+              "$eq": {
+                "$oid": "6abd371dcfbb3c284875fd06"
+              }
+            }
+          },
+          {
+            "text": {
+              "$regex": "\\bpizza\\b",
+              "$options": "i"
+            }
+          }
+        ]
+      },
+      "nReturned": 473,
+      "executionTimeMillisEstimate": 183,
+      "works": 100001,
+      "advanced": 473,
+      "needTime": 99527,
+      "needYield": 0,
+      "saveState": 12,
+      "restoreState": 12,
+      "isEOF": 1,
+      "nss": "oee_chat_bench.messages",
+      "direction": "forward",
+      "docsExamined": 100000
+    },
+    "allPlansExecution": []
+  },
+  "queryShapeHash": "771EF830EFA076382385E5CF63ADEF9BB8FFF0416AAEA043122F7FE4C20900AF",
+  "command": {
+    "find": "messages",
+    "filter": {
+      "room_id": {
+        "$oid": "6abd371dcfbb3c284875fd06"
+      },
+      "text": {
+        "$regex": "\\bpizza\\b",
+        "$options": "i"
+      }
+    },
+    "$db": "oee_chat_bench"
+  },
+  "serverInfo": {
+    "host": "LENOVO-THINKPAD",
+    "port": 27017,
+    "version": "8.3.11",
+    "gitVersion": "b8b83d6e6e1aed495578ad8c6f9234ad329c9955"
+  },
+  "serverParameters": {
+    "internalQueryFacetBufferSizeBytes": 104857600,
+    "internalDocumentSourceGroupMaxMemoryBytes": 104857600,
+    "internalQueryMaxBlockingSortMemoryUsageBytes": 104857600,
+    "internalDocumentSourceSetWindowFieldsMaxMemoryBytes": 104857600,
+    "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
+    "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
+    "internalQueryProhibitBlockingMergeOnMongoS": 0,
+    "internalQueryMaxAddToSetBytes": 104857600,
+    "internalQueryFrameworkControl": "trySbeRestricted",
+    "internalQueryPlannerIgnoreIndexWithCollationForRegex": 1
+  },
+  "ok": 1.0
+}
