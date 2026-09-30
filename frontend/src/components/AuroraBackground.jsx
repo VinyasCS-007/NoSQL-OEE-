@@ -1,5 +1,8 @@
-/** Slow-moving colour blobs + grid + film grain behind a page. Pure CSS, GPU transforms only. */
-export default function AuroraBackground({ intensity = 1, grid = true }) {
+/**
+ * Fixed full-page backdrop of slow-moving colour blobs, an optional grid and film grain. Put it once at the top of a page; it sits behind everything (-z-10).
+ * @category Effects
+ */
+export function AuroraBackground({ intensity = 1, grid = true }) {
   return (
     <div aria-hidden className="noise pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-bg">
       <div
@@ -18,3 +21,5 @@ export default function AuroraBackground({ intensity = 1, grid = true }) {
     </div>
   )
 }
+
+export default AuroraBackground

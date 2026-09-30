@@ -26,7 +26,11 @@ function EmptyState() {
   )
 }
 
-export default function MessageList({ messages, loading, me, hasMore, loadingOlder, onLoadOlder, onImage }) {
+/**
+ * Scrollable message history. Auto-scrolls to new messages, keeps position when older messages are prepended, and shows loading skeletons, an empty state and a jump-to-latest button.
+ * @category Chat
+ */
+export function MessageList({ messages, loading, me, hasMore, loadingOlder, onLoadOlder, onImage }) {
   const boxRef = useRef(null)
   const stickToBottom = useRef(true)
   const prevHeight = useRef(0)
@@ -107,3 +111,5 @@ export default function MessageList({ messages, loading, me, hasMore, loadingOld
     </div>
   )
 }
+
+export default MessageList

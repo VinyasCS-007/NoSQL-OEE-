@@ -12,7 +12,10 @@ const variants = {
   outline: 'glass text-text shadow-e1 hover:border-border-strong hover:shadow-e2',
 }
 
-/** Magnetic button: it leans toward the cursor and a light sheen sweeps across on hover. */
+/**
+ * Primary call-to-action button. Magnetic: it leans toward the cursor, and the primary variant has a light sheen that sweeps across on hover. Variants: primary (brand gradient), outline (glass), ghost.
+ * @category Actions
+ */
 export function Button({ variant = 'primary', className = '', children, magnetic = true, ...props }) {
   const ref = useRef(null)
   const reduce = useReducedMotion()
@@ -48,6 +51,10 @@ export function Button({ variant = 'primary', className = '', children, magnetic
   )
 }
 
+/**
+ * Square 40px icon-only button with hover and tap feedback. Always pass `label`; it becomes aria-label and title.
+ * @category Actions
+ */
 export function IconButton({ label, className = '', children, ...props }) {
   return (
     <motion.button
@@ -65,6 +72,10 @@ export function IconButton({ label, className = '', children, ...props }) {
   )
 }
 
+/**
+ * Labelled text input with a soft accent focus glow. Pass `id` and `label`; every other prop goes to the <input>.
+ * @category Forms
+ */
 export function Input({ label, id, ...props }) {
   return (
     <label htmlFor={id} className="group block">
@@ -80,6 +91,10 @@ export function Input({ label, id, ...props }) {
   )
 }
 
+/**
+ * Small pill that marks a user as Guest (amber) or Member (green). Shown next to aliases.
+ * @category Display
+ */
 export function RoleBadge({ type, className = '' }) {
   const guest = type === 'guest'
   const Icon = guest ? UserRound : Sparkles
@@ -94,7 +109,10 @@ export function RoleBadge({ type, className = '' }) {
   )
 }
 
-/** Theme switch: the icon flips over in 3D. */
+/**
+ * Light/dark theme switch. Toggles the `dark` class on <html> and remembers the choice in localStorage; the sun/moon icon flips over in 3D.
+ * @category Actions
+ */
 export function ThemeToggle() {
   const [dark, toggle] = useTheme()
   return (
@@ -115,6 +133,10 @@ export function ThemeToggle() {
   )
 }
 
+/**
+ * Whisper brand mark: gradient chat-bubble tile plus wordmark. `compact` hides the wordmark.
+ * @category Brand
+ */
 export function Logo({ className = '', compact = false }) {
   return (
     <span className={`inline-flex items-center gap-2.5 font-bold tracking-tight ${className}`}>
@@ -133,11 +155,18 @@ export function Logo({ className = '', compact = false }) {
   )
 }
 
+/**
+ * Shimmering loading placeholder. Size and shape it with className (e.g. `h-4 w-32`, `rounded-full`).
+ * @category Feedback
+ */
 export function Skeleton({ className = '', ...props }) {
   return <div className={`shimmer rounded-xl ${className}`} {...props} />
 }
 
-/** Wraps each page so route changes fade, lift and un-blur. */
+/**
+ * Route wrapper that fades, lifts and un-blurs its content on enter, and reverses on exit. Use as the root element of a page.
+ * @category Layout
+ */
 export function Page({ children, className = '' }) {
   return (
     <motion.main

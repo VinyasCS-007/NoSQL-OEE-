@@ -2,7 +2,11 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Download, X } from 'lucide-react'
 import { useEffect } from 'react'
 
-export default function Lightbox({ src, onClose }) {
+/**
+ * Full-screen image viewer with a 3D zoom-in, drag-to-wiggle, an open-original link and Escape to close. Renders nothing when `src` is null.
+ * @category Overlays
+ */
+export function Lightbox({ src, onClose }) {
   useEffect(() => {
     if (!src) return
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -51,3 +55,5 @@ export default function Lightbox({ src, onClose }) {
     </AnimatePresence>
   )
 }
+
+export default Lightbox

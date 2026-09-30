@@ -2,7 +2,11 @@ import { AnimatePresence, motion } from 'framer-motion'
 
 const LABELS = { open: 'Live', connecting: 'Connecting', closed: 'Reconnecting' }
 
-export default function ConnectionStatus({ status }) {
+/**
+ * Live-connection pill: a green pulsing dot when `open`, and amber typing dots when `connecting` or `closed`.
+ * @category Feedback
+ */
+export function ConnectionStatus({ status }) {
   const live = status === 'open'
   return (
     <motion.div
@@ -38,3 +42,5 @@ export default function ConnectionStatus({ status }) {
     </motion.div>
   )
 }
+
+export default ConnectionStatus

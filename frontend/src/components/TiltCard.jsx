@@ -1,10 +1,10 @@
 import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion'
 
 /**
- * Card that tilts in 3D toward the pointer, with a moving glare highlight.
- * Children can use `transform-[translateZ(40px)]` to float above the card.
+ * Card that tilts in 3D toward the pointer, with a moving glare highlight. Style the surface with className (e.g. `glass ring-gradient rounded-3xl p-6`); children can float above it with `transform-[translateZ(40px)]`.
+ * @category Effects
  */
-export default function TiltCard({ children, className = '', max = 10, glare = true, as = 'div', ...props }) {
+export function TiltCard({ children, className = '', max = 10, glare = true, as = 'div', ...props }) {
   const reduce = useReducedMotion()
   const px = useMotionValue(0.5)
   const py = useMotionValue(0.5)
@@ -41,3 +41,5 @@ export default function TiltCard({ children, className = '', max = 10, glare = t
     </div>
   )
 }
+
+export default TiltCard

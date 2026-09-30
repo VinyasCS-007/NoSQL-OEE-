@@ -6,7 +6,11 @@ import { Skeleton } from './ui'
 const list = { show: { transition: { staggerChildren: 0.035 } } }
 const item = { hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }
 
-export default function RoomSidebar({ rooms, loading, activeId, onSelect, onCreate }) {
+/**
+ * Room navigation: create-room field, a list of public rooms with an animated active pill, a filter when there are many rooms, and loading skeletons.
+ * @category Chat
+ */
+export function RoomSidebar({ rooms, loading, activeId, onSelect, onCreate }) {
   const [name, setName] = useState('')
   const [filter, setFilter] = useState('')
   const [error, setError] = useState('')
@@ -113,3 +117,5 @@ export default function RoomSidebar({ rooms, loading, activeId, onSelect, onCrea
     </div>
   )
 }
+
+export default RoomSidebar

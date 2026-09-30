@@ -1,4 +1,4 @@
-# Project: Anonymous Web Chat App (NoSQL OEE mini project)
+y # Project: Anonymous Web Chat App (NoSQL OEE mini project)
 
 ## Context
 College Open Ended Experiment for the course "NoSQL Database" (BISNS701). The requirement is a mini project using NoSQL databases plus a front end. The syllabus is MongoDB-focused: indexing (compound, text, unique, TTL, partial), aggregation, GridFS, capped collections, sharding, schema validation, `explain()`.

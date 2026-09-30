@@ -9,6 +9,10 @@ const time = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', mi
 // deterministic hue per alias, so each person gets a consistent avatar colour
 const hue = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7)
 
+/**
+ * Round initials avatar. The gradient colour is derived from the alias, so each person keeps a consistent colour.
+ * @category Display
+ */
 export function Avatar({ alias, size = 32 }) {
   const h = hue(alias)
   return (
@@ -22,7 +26,11 @@ export function Avatar({ alias, size = 32 }) {
   )
 }
 
-export default function MessageBubble({ message, mine, grouped, onImage }) {
+/**
+ * One chat message: avatar, alias with a guest/member badge, a text and/or image bubble, and the time on hover. `mine` right-aligns it with the brand gradient; `grouped` hides the header for consecutive messages from the same sender.
+ * @category Chat
+ */
+export function MessageBubble({ message, mine, grouped, onImage }) {
   const { sender, text, image_file_id, created_at } = message
   const [loaded, setLoaded] = useState(false)
 
@@ -78,3 +86,5 @@ export default function MessageBubble({ message, mine, grouped, onImage }) {
     </motion.div>
   )
 }
+
+export default MessageBubble

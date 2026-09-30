@@ -63,7 +63,11 @@ function Rig() {
   return null
 }
 
-export default function Scene3D({ reduceMotion = false }) {
+/**
+ * The raw three.js canvas behind HeroScene: floating chat bubbles with typing dots, an orb, sparkles and pointer parallax. Prefer HeroScene, which adds loading and WebGL fallbacks.
+ * @category Effects
+ */
+export function Scene3D({ reduceMotion = false }) {
   return (
     <Canvas
       dpr={[1, 1.75]}
@@ -96,3 +100,5 @@ export default function Scene3D({ reduceMotion = false }) {
     </Canvas>
   )
 }
+
+export default Scene3D

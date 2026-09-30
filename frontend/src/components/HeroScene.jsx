@@ -15,8 +15,11 @@ function webglAvailable() {
 
 const hasWebGL = typeof document !== 'undefined' && webglAvailable()
 
-/** 3D scene with a soft gradient fallback while loading or when WebGL is missing. */
-export default function HeroScene({ className = '' }) {
+/**
+ * 3D hero illustration of floating glass chat bubbles and an iridescent orb (three.js), with a soft glow fallback while loading or without WebGL. Give it a height via className.
+ * @category Effects
+ */
+export function HeroScene({ className = '' }) {
   const reduce = useReducedMotion()
   const fallback = (
     <div className="absolute inset-0 grid place-items-center">
@@ -34,3 +37,5 @@ export default function HeroScene({ className = '' }) {
     </motion.div>
   )
 }
+
+export default HeroScene

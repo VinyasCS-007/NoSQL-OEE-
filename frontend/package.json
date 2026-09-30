@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:ds-css": "tailwindcss -i src/design-system.css -o ds-dist/design-system.css --minify"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
@@ -20,6 +21,7 @@
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/vite": "^4.0.0",
     "@vitejs/plugin-react": "^5.0.0",
     "tailwindcss": "^4.0.0",

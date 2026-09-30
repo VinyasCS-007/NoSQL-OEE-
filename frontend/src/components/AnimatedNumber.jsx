@@ -1,8 +1,11 @@
 import { animate, useInView, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
-/** Counts up from the previous value to `value` when scrolled into view. */
-export default function AnimatedNumber({ value, className = '' }) {
+/**
+ * Number that counts up to `value` when scrolled into view (tabular figures). Good for stat tiles.
+ * @category Display
+ */
+export function AnimatedNumber({ value, className = '' }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true })
   const reduce = useReducedMotion()
@@ -23,3 +26,5 @@ export default function AnimatedNumber({ value, className = '' }) {
 
   return <span ref={ref} className={`tabular-nums ${className}`}>{shown.toLocaleString()}</span>
 }
+
+export default AnimatedNumber

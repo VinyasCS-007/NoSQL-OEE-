@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+export const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:8000'
 export const WS_URL = API_URL.replace(/^http/, 'ws')
 
 async function request(path, { token, body, method = 'GET', form } = {}) {

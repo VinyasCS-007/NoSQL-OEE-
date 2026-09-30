@@ -12,3 +12,4 @@ ds-bundle/
 .design-sync/learnings/
 .design-sync/node_modules
 .claude/settings.local.json
+frontend/ds-dist/

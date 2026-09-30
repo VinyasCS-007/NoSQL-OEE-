@@ -5,8 +5,11 @@ import { useEffect, useRef, useState } from 'react'
 const MAX_BYTES = 5 * 1024 * 1024
 const TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
-/** Floating glass composer dock. */
-export default function InputBar({ isMember, disabled, onSend, onUpload }) {
+/**
+ * Floating glass message composer: auto-growing textarea, image attach (members only; guests see a lock), preview of the picked image, and a send button. Enter sends, Shift+Enter adds a new line.
+ * @category Chat
+ */
+export function InputBar({ isMember, disabled, onSend, onUpload }) {
   const [text, setText] = useState('')
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -150,3 +153,5 @@ export default function InputBar({ isMember, disabled, onSend, onUpload }) {
     </form>
   )
 }
+
+export default InputBar
