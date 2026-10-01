@@ -49,7 +49,7 @@ app/
   ws.py          WebSocket connection manager (per-room broadcast)
   images.py      upload validation, EXIF stripping, GridFS helpers
   stats.py       aggregation pipelines for the dashboard
-  ratelimit.py   rate-limit hook (no-op today, Redis later)
+  ratelimit.py   in-memory sliding-window rate limits (Redis when scaled out)
   config.py      settings from .env
   models.py      Pydantic request/response models
 tests/           pytest suite (runs against the oee_chat_test database)
@@ -86,7 +86,7 @@ npm run dev                 # http://localhost:5173
 ### 3. Tests
 
 ```bash
-pytest                      # 22 tests: rooms, pagination, schema validation, auth, WebSocket, GridFS, stats, replies, typing, presence
+pytest                      # 27 tests: rooms, pagination, schema validation, auth, WebSocket, GridFS, stats, replies, typing, presence
 ```
 
 ### 4. Index benchmark
@@ -115,7 +115,7 @@ Saves `explain("executionStats")` JSON for each query with and without its index
 
 ## Deployment
 
-**Live:** frontend `https://<netlify-site>` · API `https://<render-service>.onrender.com` (filled in after the first deploy)
+**Live:** frontend <https://whisper-anon-chat.netlify.app> · API <https://anon-chat-api-lbrb.onrender.com> ([docs](https://anon-chat-api-lbrb.onrender.com/docs))
 
 ```
 Browser ──HTTPS──▶ Netlify (React build, CDN)
