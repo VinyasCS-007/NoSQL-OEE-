@@ -8,6 +8,15 @@ TEST_DB = "oee_chat_test"
 settings.db_name = TEST_DB  # set before the app connects
 
 
+@pytest.fixture(autouse=True)
+def fresh_rate_limits():
+    """Each test starts with empty rate-limit counters."""
+    from app import ratelimit
+    ratelimit.reset()
+    yield
+    ratelimit.reset()
+
+
 @pytest.fixture
 def sync_db():
     """Plain sync pymongo handle for direct DB checks in tests."""

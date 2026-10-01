@@ -1,0 +1,28 @@
+# Render blueprint for the FastAPI backend (New > Blueprint > pick this repo).
+# Exactly one instance: presence, typing and WebSocket rooms live in memory.
+services:
+  - type: web
+    name: anon-chat-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # --proxy-headers so rate limits see the visitor's IP, not Render's proxy
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips="*"
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ENVIRONMENT
+        value: production
+      - key: SEED_DEFAULT_ROOMS
+        value: "true"
+      - key: DB_NAME
+        value: oee_chat
+      - key: GUEST_MESSAGE_TTL_HOURS
+        value: "24"
+      - key: JWT_SECRET
+        generateValue: true   # Render creates a strong random secret
+      - key: MONGO_URI
+        sync: false           # paste the Atlas connection string in the Render dashboard
+      - key: CORS_ORIGINS
+        sync: false           # the Netlify site URL, e.g. https://anon-chat.netlify.app

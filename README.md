@@ -113,8 +113,31 @@ Saves `explain("executionStats")` JSON for each query with and without its index
 | GET | `/image/{file_id}` | anyone | streams the image from GridFS |
 | GET | `/stats` | anyone | totals (incl. `online`), messages per room, uploads per user |
 
-## Deployment (later)
+## Deployment
 
-- **Database:** MongoDB Atlas free tier. Set `MONGO_URI` to the Atlas connection string.
-- **Backend:** Render or Railway. Start command `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Set `MONGO_URI`, `JWT_SECRET` and `CORS_ORIGINS=https://<your-frontend>`.
-- **Frontend:** Vercel or Netlify. Build with `npm run build`, publish `frontend/dist`, and set `VITE_API_URL` to the backend URL. Add a SPA rewrite of `/*` to `/index.html`.
+**Live:** frontend `https://<netlify-site>` · API `https://<render-service>.onrender.com` (filled in after the first deploy)
+
+```
+Browser ──HTTPS──▶ Netlify (React build, CDN)
+   └──HTTPS + WSS──▶ Render (FastAPI, 1 instance) ──TLS──▶ MongoDB Atlas M0
+```
+
+1. **MongoDB Atlas.** Create a free M0 cluster and a database user. Under Network Access, allow `0.0.0.0/0`, because Render's free tier has no fixed IP. Copy the `mongodb+srv://…` connection string.
+2. **Render (backend).** Click New → Blueprint and pick this repo. [render.yaml](render.yaml) configures it:
+   - a free plan with a single instance (presence and typing are held in memory)
+   - a `/health` health check
+   - a generated `JWT_SECRET`
+   - `ENVIRONMENT=production`, so the app won't start with the default secret
+   - `SEED_DEFAULT_ROOMS=true`, which creates General, Anime, Music, Study Group and Cricket the first time the server starts
+
+   In the dashboard, fill in `MONGO_URI` (the Atlas string) and `CORS_ORIGINS` (the Netlify URL).
+3. **Netlify (frontend).** Import this repo. [netlify.toml](netlify.toml) sets the base to `frontend/`, builds with `npm run build` and adds the SPA rewrite, so a refresh on `/chat/…` or `/dashboard` still works. Set `VITE_API_URL=https://<render-service>.onrender.com`. WebSockets switch to `wss://` automatically.
+4. Set Render's `CORS_ORIGINS` to the final Netlify URL and redeploy.
+
+**What to expect on free tiers**
+- **Cold starts:** Render sleeps after about 15 minutes without traffic. The first visitor then waits about 50 seconds, and open chats reconnect on their own.
+- **Storage:** Atlas M0 holds 512 MB, and GridFS pictures count towards that.
+- **Rate limits** (in memory, in [app/ratelimit.py](app/ratelimit.py)):
+  - 5 messages per 5 seconds per sender
+  - 10 uploads per hour per member
+  - 5 new rooms per 10 minutes, 20 guest sessions per hour and 10 login attempts per minute, per visitor IP

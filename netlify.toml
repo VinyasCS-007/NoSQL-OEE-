@@ -1,0 +1,15 @@
+# Netlify build for the React frontend (lives in frontend/).
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # VITE_API_URL is set in the Netlify site settings to the Render backend URL
+
+# single-page app: let React Router handle /chat/..., /dashboard etc. on refresh
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

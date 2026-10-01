@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import Depends, FastAPI, HTTPException, Query, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from gridfs.errors import NoFile
@@ -17,13 +17,22 @@ from app.config import settings
 from app.messages import find_reply_target, get_history, message_out, resolve_replies, save_message
 from app.models import (LoginIn, MessagePage, RegisterIn, RoomCreate, RoomOut, TokenOut,
                         UploadOut)
-from app.ratelimit import check_rate_limit
+from app.ratelimit import allow, check_rate_limit
 from app.ws import manager
+
+
+DEFAULT_ROOMS = ["General", "Anime", "Music", "Study Group", "Cricket"]
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if settings.environment == "production" and settings.jwt_secret in ("", "change-me"):
+        # with the default secret anyone could forge tokens, so never serve publicly like that
+        raise RuntimeError("Set a strong JWT_SECRET before running in production")
     await db.connect()  # connects, applies schema validators and indexes
+    if settings.seed_default_rooms and await db.get_db().rooms.count_documents({}) == 0:
+        now = datetime.now(timezone.utc)
+        await db.get_db().rooms.insert_many([{"name": n, "created_at": now} for n in DEFAULT_ROOMS])
     yield
     await db.close()
 
@@ -44,6 +53,16 @@ def to_object_id(value: str, what: str = "Item") -> ObjectId:
         raise HTTPException(404, f"{what} not found")
 
 
+def client_ip(request: Request) -> str:
+    # behind Render's proxy uvicorn --proxy-headers puts the real visitor IP here
+    return request.client.host if request.client else "unknown"
+
+
+def limit(action: str, key: str, detail: str):
+    if not allow(action, key):
+        raise HTTPException(429, detail)
+
+
 def room_out(doc: dict) -> dict:
     rid = str(doc["_id"])
     return {"id": rid, "name": doc["name"], "created_at": doc["created_at"], "online": manager.online(rid)}
@@ -58,14 +77,16 @@ async def health():
 # ---------- guests and members ----------
 
 @app.post("/guest", response_model=TokenOut)
-async def guest():
+async def guest(request: Request):
+    limit("guest", client_ip(request), "Too many guest sessions from this network. Try again later.")
     # Guests are not stored in the DB: the signed token carries their alias.
     alias = random_alias()
     return {"token": create_token("guest", alias), "role": "guest", "alias": alias}
 
 
 @app.post("/register", response_model=TokenOut, status_code=201)
-async def register(body: RegisterIn):
+async def register(body: RegisterIn, request: Request):
+    limit("auth", client_ip(request), "Too many attempts. Wait a minute and try again.")
     alias = (body.alias or random_alias()).strip()
     doc = {
         "email": body.email.lower(),
@@ -81,7 +102,8 @@ async def register(body: RegisterIn):
 
 
 @app.post("/login", response_model=TokenOut)
-async def login(body: LoginIn):
+async def login(body: LoginIn, request: Request):
+    limit("auth", client_ip(request), "Too many attempts. Wait a minute and try again.")
     user = await db.get_db().users.find_one({"email": body.email.lower()})
     if not user or not verify_password(body.password, user["pwd_hash"]):
         raise HTTPException(401, "Wrong email or password")
@@ -97,10 +119,12 @@ async def list_rooms():
 
 
 @app.post("/rooms", response_model=RoomOut, status_code=201)
-async def create_room(body: RoomCreate):
+async def create_room(body: RoomCreate, request: Request):
+    # guests and members can both create rooms; the limit keeps bots from flooding the list
     name = body.name.strip()
     if not name:
         raise HTTPException(422, "Room name cannot be blank")
+    limit("room", client_ip(request), "You're creating rooms too fast. Try again in a few minutes.")
     # case-insensitive duplicate check ("General" == "general")
     exists = await db.get_db().rooms.find_one(
         {"name": {"$regex": f"^{re.escape(name)}$", "$options": "i"}}
@@ -147,6 +171,7 @@ async def presence():
 
 @app.post("/upload", response_model=UploadOut, status_code=201)
 async def upload(file: UploadFile, member: dict = Depends(require_member)):
+    limit("upload", member["sub"], "Upload limit reached (10 pictures per hour).")
     data = await file.read(images.MAX_BYTES + 1)  # read one extra byte to detect oversize
     try:
         clean, content_type = images.validate_and_reencode(data)
@@ -235,7 +260,7 @@ async def chat_socket(ws: WebSocket, room_id: str, token: str = "", presence: in
             if not text and not image_id:
                 continue
             if not await check_rate_limit(identity):
-                await ws.send_json({"type": "error", "detail": "Slow down"})
+                await ws.send_json({"type": "error", "detail": "Slow down, you're sending messages too fast."})
                 continue
 
             doc = await save_message(oid, sender_from_identity(identity), text, image_id,

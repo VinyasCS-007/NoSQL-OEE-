@@ -84,5 +84,10 @@ The benchmark used 100,000 messages in 50 rooms and 20,000 users, on a local Mon
 ## 8. Designed for later (not built)
 
 - **Sharding:** `room_id` is on every message and leads the compound index, making it the natural shard key.
-- **Rate limiting:** every WebSocket message goes through `ratelimit.check_rate_limit()`, a no-op today. A Redis counter can replace it without touching the chat code.
+- **Rate limiting (added for the public deployment):** every limited action goes through `ratelimit.allow()`, an in-memory sliding window. The limits are:
+  - 5 messages per 5 seconds per sender
+  - 10 uploads per hour per member
+  - 5 rooms per 10 minutes, 20 guest sessions per hour and 10 auth attempts per minute, per IP
+
+  Requests over a limit get HTTP 429, or a WebSocket "Slow down" error. Because the counters live in one process, a Redis counter replaces it when the app scales out, without touching the routes.
 - **Reports:** moderation goes in a separate `reports` collection, with no change to `messages`.
