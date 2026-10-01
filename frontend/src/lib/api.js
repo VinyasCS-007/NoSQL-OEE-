@@ -24,8 +24,8 @@ export const api = {
   login: (body) => request('/login', { method: 'POST', body }),
   rooms: () => request('/rooms'),
   createRoom: (name) => request('/rooms', { method: 'POST', body: { name } }),
-  messages: (roomId, { before, q } = {}) => {
-    const p = new URLSearchParams({ limit: '50' })
+  messages: (roomId, { before, q, limit = 50 } = {}) => {
+    const p = new URLSearchParams({ limit: String(limit) })
     if (before) p.set('before', before)
     if (q) p.set('q', q)
     return request(`/rooms/${roomId}/messages?${p}`)
@@ -36,6 +36,7 @@ export const api = {
     return request('/upload', { method: 'POST', form, token })
   },
   stats: () => request('/stats'),
+  presence: () => request('/presence'),
 }
 
 export const imageUrl = (id) => `${API_URL}/image/${id}`

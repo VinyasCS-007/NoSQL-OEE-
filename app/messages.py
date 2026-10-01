@@ -10,11 +10,14 @@ MAX_PAGE = 100
 
 
 async def save_message(room_id: ObjectId, sender: dict, text: str,
-                       image_file_id: ObjectId | None = None) -> dict:
+                       image_file_id: ObjectId | None = None,
+                       reply_to: ObjectId | None = None) -> dict:
     now = datetime.now(timezone.utc)
     doc = {"room_id": room_id, "sender": sender, "text": text, "created_at": now}
     if image_file_id:
         doc["image_file_id"] = image_file_id
+    if reply_to:
+        doc["reply_to"] = reply_to
     # Only guests get expires_at, so only their messages are removed by the TTL index.
     if sender["type"] == "guest":
         doc["expires_at"] = now + timedelta(hours=settings.guest_message_ttl_hours)
@@ -44,7 +47,22 @@ async def get_history(room_id: ObjectId, before: dict | None = None,
     return await cursor.to_list()
 
 
-def message_out(doc: dict) -> dict:
+async def find_reply_target(room_id: ObjectId, message_id: ObjectId) -> dict | None:
+    """A reply may only point at a message in the same room."""
+    return await get_db().messages.find_one({"_id": message_id, "room_id": room_id},
+                                            {"sender.alias": 1, "text": 1})
+
+
+async def resolve_replies(docs: list[dict]) -> dict:
+    """One $in query for every reply_to on the page (no N+1 lookups). _id index only."""
+    ids = list({d["reply_to"] for d in docs if d.get("reply_to")})
+    if not ids:
+        return {}
+    found = await get_db().messages.find({"_id": {"$in": ids}}, {"sender.alias": 1, "text": 1}).to_list()
+    return {f["_id"]: f for f in found}
+
+
+def message_out(doc: dict, reply_doc: dict | None = None) -> dict:
     """Convert a message document to its public JSON shape (no user_id, no email)."""
     return {
         "id": str(doc["_id"]),
@@ -52,5 +70,8 @@ def message_out(doc: dict) -> dict:
         "sender": {"type": doc["sender"]["type"], "alias": doc["sender"]["alias"]},
         "text": doc["text"],
         "image_file_id": str(doc["image_file_id"]) if doc.get("image_file_id") else None,
+        "reply_to": str(doc["reply_to"]) if doc.get("reply_to") else None,
+        "reply": {"id": str(reply_doc["_id"]), "alias": reply_doc["sender"]["alias"],
+                  "text": reply_doc["text"][:200]} if reply_doc else None,
         "created_at": doc["created_at"],
     }

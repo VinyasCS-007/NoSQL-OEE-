@@ -1,177 +1,129 @@
 @import "tailwindcss";
 
-/* dark mode is toggled by a .dark class on <html> */
-@custom-variant dark (&:where(.dark, .dark *));
+/* theme + mood live on <html data-theme data-mood data-motion> (set before paint in index.html) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* ---------- Design tokens: every colour in the UI comes from these ---------- */
+/* ---------- design tokens: every colour in the UI comes from these ---------- */
 :root {
-  --bg: #f4f5fb;
-  --bg-2: #eceefa;
-  --surface: rgb(255 255 255 / 0.72);
-  --surface-solid: #ffffff;
-  --surface-2: rgb(236 238 250 / 0.9);
-  --border: rgb(20 24 60 / 0.09);
-  --border-strong: rgb(20 24 60 / 0.16);
-  --text: #0f1224;
-  --muted: #5a6180;
-  --accent: #6d4aff;
-  --accent-2: #00b8d9;
-  --accent-3: #ff4fa3;
-  --accent-soft: rgb(109 74 255 / 0.1);
-  --on-accent: #ffffff;
-  --guest: #b45309;
-  --guest-soft: rgb(251 191 36 / 0.18);
-  --member: #047857;
-  --member-soft: rgb(16 185 129 / 0.15);
-  --danger: #dc2626;
-  --glow: rgb(109 74 255 / 0.35);
-  --shadow-1: 0 1px 2px rgb(15 18 36 / 0.06), 0 1px 1px rgb(15 18 36 / 0.04);
-  --shadow-2: 0 8px 24px -8px rgb(15 18 36 / 0.14), 0 2px 6px rgb(15 18 36 / 0.05);
-  --shadow-3: 0 24px 60px -18px rgb(40 30 110 / 0.28), 0 6px 18px -6px rgb(15 18 36 / 0.1);
-  --grid-line: rgb(20 24 60 / 0.05);
+  --bg: #f4f5fb; --bg-2: #eceefa;
+  --surface: rgb(255 255 255 / .72); --surface-solid: #fff; --surface-2: rgb(236 238 250 / .9);
+  --border: rgb(20 24 60 / .09); --border-strong: rgb(20 24 60 / .16);
+  --text: #0f1224; --muted: #5a6180;
+  --accent: #6d4aff; --accent-2: #00b8d9; --accent-3: #ff4fa3; --accent-soft: rgb(109 74 255 / .1); --on-accent: #fff;
+  --guest: #b45309; --guest-soft: rgb(251 191 36 / .18); --member: #047857; --member-soft: rgb(16 185 129 / .15);
+  --danger: #dc2626; --glow: rgb(109 74 255 / .35);
+  --shadow-1: 0 1px 2px rgb(15 18 36 / .06), 0 1px 1px rgb(15 18 36 / .04);
+  --shadow-2: 0 8px 24px -8px rgb(15 18 36 / .14), 0 2px 6px rgb(15 18 36 / .05);
+  --shadow-3: 0 24px 60px -18px rgb(40 30 110 / .28), 0 6px 18px -6px rgb(15 18 36 / .1);
+  --grid-line: rgb(20 24 60 / .05); --aurora: 1;
+  color-scheme: light;
 }
-
-.dark {
-  --bg: #07080f;
-  --bg-2: #0d0f1c;
-  --surface: rgb(20 22 38 / 0.62);
-  --surface-solid: #12142a;
-  --surface-2: rgb(34 37 62 / 0.7);
-  --border: rgb(255 255 255 / 0.08);
-  --border-strong: rgb(255 255 255 / 0.15);
-  --text: #eef0ff;
-  --muted: #9aa0c3;
-  --accent: #8b6cff;
-  --accent-2: #22d3ee;
-  --accent-3: #ff5fb0;
-  --accent-soft: rgb(139 108 255 / 0.16);
-  --on-accent: #ffffff;
-  --guest: #fbbf24;
-  --guest-soft: rgb(251 191 36 / 0.14);
-  --member: #34d399;
-  --member-soft: rgb(52 211 153 / 0.14);
-  --danger: #f87171;
-  --glow: rgb(139 108 255 / 0.5);
-  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-2: 0 10px 30px -10px rgb(0 0 0 / 0.6);
-  --shadow-3: 0 30px 80px -20px rgb(0 0 0 / 0.75), 0 0 0 1px rgb(255 255 255 / 0.04);
-  --grid-line: rgb(255 255 255 / 0.035);
+[data-theme="dark"] {
+  --bg: #07080f; --bg-2: #0d0f1c;
+  --surface: rgb(20 22 38 / .62); --surface-solid: #12142a; --surface-2: rgb(34 37 62 / .7);
+  --border: rgb(255 255 255 / .08); --border-strong: rgb(255 255 255 / .15);
+  --text: #eef0ff; --muted: #9aa0c3;
+  --accent: #8b6cff; --accent-2: #22d3ee; --accent-3: #ff5fb0; --accent-soft: rgb(139 108 255 / .16);
+  --guest: #fbbf24; --guest-soft: rgb(251 191 36 / .14); --member: #34d399; --member-soft: rgb(52 211 153 / .14);
+  --danger: #f87171; --glow: rgb(139 108 255 / .5);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / .4);
+  --shadow-2: 0 10px 30px -10px rgb(0 0 0 / .6);
+  --shadow-3: 0 30px 80px -20px rgb(0 0 0 / .75), 0 0 0 1px rgb(255 255 255 / .04);
+  --grid-line: rgb(255 255 255 / .035);
+  color-scheme: dark;
 }
+[data-mood="cinematic"][data-theme="dark"] { --bg: #04050b; --bg-2: #0a0b17; --surface: rgb(16 18 34 / .55); --glow: rgb(139 108 255 / .62); --aurora: 1.3; }
+[data-mood="cinematic"][data-theme="light"] { --bg: #eef0f8; --text: #0a0c1c; --aurora: 1.15; }
+[data-mood="airy"][data-theme="light"] { --bg: #f8f8fd; --bg-2: #f1f1fa; --surface: rgb(255 255 255 / .6); --border: rgb(20 24 60 / .07); --muted: #5f6684; --glow: rgb(109 74 255 / .24); --shadow-2: 0 18px 40px -18px rgb(40 30 110 / .16), 0 2px 6px rgb(15 18 36 / .04); --aurora: .75; }
+[data-mood="airy"][data-theme="dark"] { --bg: #0d0f1e; --bg-2: #141730; --surface: rgb(30 33 58 / .5); --glow: rgb(139 108 255 / .35); --aurora: .8; }
 
 @theme inline {
-  --font-sans: "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
-  --color-bg: var(--bg);
-  --color-bg-2: var(--bg-2);
-  --color-surface: var(--surface);
-  --color-surface-solid: var(--surface-solid);
-  --color-surface-2: var(--surface-2);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-text: var(--text);
-  --color-muted: var(--muted);
-  --color-accent: var(--accent);
-  --color-accent-2: var(--accent-2);
-  --color-accent-3: var(--accent-3);
-  --color-accent-soft: var(--accent-soft);
-  --color-on-accent: var(--on-accent);
-  --color-guest: var(--guest);
-  --color-guest-soft: var(--guest-soft);
-  --color-member: var(--member);
-  --color-member-soft: var(--member-soft);
+  --color-bg: var(--bg); --color-bg-2: var(--bg-2);
+  --color-surface: var(--surface); --color-surface-solid: var(--surface-solid); --color-surface-2: var(--surface-2);
+  --color-border: var(--border); --color-border-strong: var(--border-strong);
+  --color-text: var(--text); --color-muted: var(--muted);
+  --color-accent: var(--accent); --color-accent-2: var(--accent-2); --color-accent-3: var(--accent-3);
+  --color-accent-soft: var(--accent-soft); --color-on-accent: var(--on-accent);
+  --color-guest: var(--guest); --color-guest-soft: var(--guest-soft);
+  --color-member: var(--member); --color-member-soft: var(--member-soft);
   --color-danger: var(--danger);
-  --shadow-e1: var(--shadow-1);
-  --shadow-e2: var(--shadow-2);
-  --shadow-e3: var(--shadow-3);
+  --shadow-e1: var(--shadow-1); --shadow-e2: var(--shadow-2); --shadow-e3: var(--shadow-3);
 }
 
-html, body, #root { height: 100%; }
-body {
-  @apply bg-bg text-text font-sans antialiased;
-  font-feature-settings: "ss01", "cv11";
-  transition: background-color .3s ease, color .3s ease;
+/* Base element styles live in the base layer so Tailwind utilities (text-*, font-*, bg-*)
+   on a button, input or link can override them. Unlayered, these rules beat every utility:
+   buttons ignored their own colour and font classes (e.g. white text on the white CTA). */
+@layer base {
+  html, body, #root { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; font-feature-settings: "ss01", "cv11"; }
+  button, input, textarea { font: inherit; color: inherit; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ::selection { background: var(--accent); color: #fff; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  input::placeholder, textarea::placeholder { color: var(--muted); opacity: .7; }
 }
-
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
-::selection { background: var(--accent); color: white; }
 
 /* ---------- reusable effects ---------- */
 @utility glass {
   background: var(--surface);
-  backdrop-filter: blur(18px) saturate(170%);
-  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
   border: 1px solid var(--border);
 }
-
-@utility text-gradient {
-  background: linear-gradient(100deg, var(--accent) 0%, var(--accent-3) 45%, var(--accent-2) 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-pan 8s ease-in-out infinite;
+@utility glass-strong {
+  background: var(--surface);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-3);
 }
-
-@utility bg-brand {
-  background: linear-gradient(135deg, var(--accent) 0%, color-mix(in oklab, var(--accent) 55%, var(--accent-3)) 60%, var(--accent-3) 130%);
+@utility bg-brand { background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 60%, var(--accent-3))); }
+@utility bg-mark { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+@utility kicker { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--accent); }
+@utility mono-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+/* squishy press used by every button */
+@utility springy {
+  transition: scale .35s cubic-bezier(.34, 1.56, .64, 1), background-color .2s, border-color .2s, color .2s, opacity .2s;
+  &:active { scale: .92; }
 }
-
-/* hairline gradient border (used on premium cards) */
-@utility ring-gradient {
-  position: relative;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: inherit;
-    background: linear-gradient(140deg, color-mix(in oklab, var(--accent) 70%, transparent), transparent 40%, transparent 60%, color-mix(in oklab, var(--accent-2) 60%, transparent));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
+@utility text-pan {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent));
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: gradientPan 10s ease infinite;
 }
-
-.shimmer {
-  background: linear-gradient(90deg, var(--surface-2) 0%, color-mix(in oklab, var(--surface-2) 40%, var(--border-strong)) 50%, var(--surface-2) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s linear infinite;
+@utility fade-x {
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+@utility fade-top {
+  mask-image: linear-gradient(transparent, #000 24%);
+  -webkit-mask-image: linear-gradient(transparent, #000 24%);
 }
 
 .bg-grid {
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
 }
-
-.noise::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
 .scroll-thin { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
 
-@keyframes shimmer { to { background-position: -200% 0; } }
-@keyframes gradient-pan { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-@keyframes aurora {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
-  33% { transform: translate3d(6%, -4%, 0) scale(1.08) rotate(8deg); }
-  66% { transform: translate3d(-5%, 5%, 0) scale(.95) rotate(-6deg); }
-}
-@keyframes sheen { from { transform: translateX(-120%) skewX(-20deg); } to { transform: translateX(220%) skewX(-20deg); } }
+@keyframes aurora { 0%, 100% { transform: translate3d(0,0,0) scale(1) rotate(0) } 33% { transform: translate3d(6%,-4%,0) scale(1.08) rotate(8deg) } 66% { transform: translate3d(-5%,5%,0) scale(.95) rotate(-6deg) } }
+@keyframes ping { 75%, 100% { transform: scale(2.2); opacity: 0 } }
+@keyframes msgIn { from { opacity: 0; transform: perspective(800px) translateY(18px) rotateX(-35deg) scale(.94) } to { opacity: 1; transform: none } }
+@keyframes marquee { from { transform: translate3d(0,0,0) } to { transform: translate3d(-50%,0,0) } }
+@keyframes marqueeRev { from { transform: translate3d(-50%,0,0) } to { transform: translate3d(0,0,0) } }
+@keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: .35 } 30% { transform: translateY(-4px); opacity: 1 } }
+@keyframes gradientPan { 0%, 100% { background-position: 0% 50% } 50% { background-position: 100% 50% } }
+@keyframes cardIn { from { opacity: 0; transform: perspective(1200px) translateY(30px) rotateX(18deg) } to { opacity: 1; transform: none } }
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes popIn { from { opacity: 0; transform: translateY(-8px) scale(.96) } to { opacity: 1; transform: none } }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%,16px) scale(.95) } to { opacity: 1; transform: translate(-50%,0) } }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
-  }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+[data-motion="off"] *, [data-motion="off"] *::before { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }

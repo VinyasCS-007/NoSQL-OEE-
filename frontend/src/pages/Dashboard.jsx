@@ -1,148 +1,142 @@
-import { motion } from 'framer-motion'
-import { ArrowLeft, Hash, ImageIcon, MessageSquare, RefreshCw, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import AnimatedNumber from '../components/AnimatedNumber'
-import AuroraBackground from '../components/AuroraBackground'
-import TiltCard from '../components/TiltCard'
-import { IconButton, Logo, Page, Skeleton, ThemeToggle } from '../components/ui'
+import { Hash, ImageIcon, MessageSquare, RefreshCw, Users } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { BackBtn, Counter, IconBtn, Page, SettingsBtn, ThemeToggle, TiltCard } from '../components/ui'
+import { useAuth } from '../hooks/useAuth'
+import { useSettings } from '../hooks/useSettings'
 import { api } from '../lib/api'
 
-// chart colours read from the CSS tokens so they follow the theme
 const css = (name) => `var(--${name})`
-
 const TILES = [
-  { key: 'rooms', label: 'Rooms', icon: Hash, tone: 'from-accent to-accent-3' },
-  { key: 'messages', label: 'Messages', icon: MessageSquare, tone: 'from-accent-2 to-accent' },
-  { key: 'members', label: 'Members', icon: Users, tone: 'from-member to-accent-2' },
-  { key: 'uploads', label: 'Uploads', icon: ImageIcon, tone: 'from-accent-3 to-accent-2' },
+  { key: 'messages', label: 'Messages sent', icon: MessageSquare, tone: 'bg-accent-soft text-accent' },
+  { key: 'online', label: 'Online now', icon: Users, tone: 'bg-member-soft text-member' },
+  { key: 'uploads', label: 'Pictures shared', icon: ImageIcon, tone: 'text-accent-3 bg-[color-mix(in_oklab,var(--accent-3)_15%,transparent)]' },
+  { key: 'rooms', label: 'Public rooms', icon: Hash, tone: 'text-accent-2 bg-[color-mix(in_oklab,var(--accent-2)_15%,transparent)]' },
 ]
-
-/** SVG gradients referenced by the bars (fill="url(#…)") */
-function Gradients() {
-  return (
-    <defs>
-      <linearGradient id="g-member" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor={css('accent')} /><stop offset="100%" stopColor={css('accent')} stopOpacity={0.55} />
-      </linearGradient>
-      <linearGradient id="g-guest" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor={css('accent-3')} /><stop offset="100%" stopColor={css('accent-3')} stopOpacity={0.55} />
-      </linearGradient>
-      <linearGradient id="g-uploads" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stopColor={css('accent-2')} stopOpacity={0.6} /><stop offset="100%" stopColor={css('accent-2')} />
-      </linearGradient>
-    </defs>
-  )
-}
+const card = 'glass relative rounded-[26px] p-[clamp(18px,3vw,26px)] shadow-e2 animate-[cardIn_.8s_cubic-bezier(.22,1,.36,1)_both]'
 
 export default function Dashboard() {
+  const navigate = useNavigate()
+  const { session } = useAuth()
+  const { buzz, motion: motionOn } = useSettings()
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [round, setRound] = useState(0)
+  const spin = useRef(null)
 
-  const load = () => {
-    setLoading(true)
-    api.stats().then(setData).catch((e) => setError(e.message)).finally(() => setLoading(false))
+  const load = useCallback(() => {
+    api.stats().then((d) => { setData(d); setError('') }).catch((e) => setError(e.message))
+  }, [])
+  useEffect(() => { load(); const id = setInterval(load, 20000); return () => clearInterval(id) }, [load])
+
+  const refresh = () => {
+    spin.current?.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(360deg)' }], { duration: 700, easing: 'cubic-bezier(.34,1.56,.64,1)' })
+    buzz(8)
+    setRound((r) => r + 1) // replays the bar animation
+    load()
   }
-  useEffect(load, [])
+  const anim = motionOn ? 900 : 0
 
   return (
-    <Page className="relative mx-auto min-h-full max-w-7xl px-4 pb-16 sm:px-6">
-      <AuroraBackground intensity={0.8} />
-      <header className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-2">
-          <Link to="/chat" aria-label="Back to chat" className="glass grid h-10 w-10 place-items-center rounded-xl text-muted shadow-e1 hover:text-text">
-            <ArrowLeft size={18} />
-          </Link>
-          <Logo />
-        </div>
-        <div className="glass flex items-center gap-1 rounded-2xl p-1 shadow-e1">
-          <IconButton label="Refresh" onClick={load}><RefreshCw size={18} className={loading ? 'animate-spin' : ''} /></IconButton>
-          <ThemeToggle />
-        </div>
-      </header>
+    <Page className="h-full">
+      <div className="scroll-thin h-full overflow-y-auto">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-[clamp(20px,3vw,32px)] px-[clamp(16px,4vw,40px)] pb-16 pt-4">
+          <div className="flex items-center justify-between gap-3">
+            <BackBtn onClick={() => navigate(session ? '/chat' : '/')} />
+            <div className="flex gap-1.5">
+              <IconBtn label="Refresh" solid onClick={refresh}><span ref={spin} className="grid place-items-center"><RefreshCw size={18} /></span></IconBtn>
+              <ThemeToggle solid />
+              <SettingsBtn solid />
+            </div>
+          </div>
+          <div className="flex flex-col gap-2.5">
+            <div className="kicker">From MongoDB aggregation pipelines</div>
+            <h1 className="m-0 text-[clamp(40px,6vw,72px)] font-bold leading-none tracking-[-0.05em]">Live stats</h1>
+          </div>
+          {error && <p role="alert" className="m-0 text-sm text-danger">{error}</p>}
 
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <p className="mt-6 font-mono text-xs uppercase tracking-[0.2em] text-accent">Analytics</p>
-        <h1 className="mt-2 text-[clamp(2rem,1.5rem+2vw,3rem)] font-extrabold tracking-[-0.03em]">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted">Live numbers from MongoDB aggregation pipelines.</p>
-      </motion.div>
-      {error && <p className="mt-4 text-sm text-danger" role="alert">{error}</p>}
-
-      <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {TILES.map((t, i) => (
-          <motion.div key={t.key} initial={{ opacity: 0, y: 24, rotateX: 25 }} animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{ delay: i * 0.07, type: 'spring', stiffness: 170, damping: 20 }}>
-            <TiltCard className="glass ring-gradient rounded-3xl p-5 shadow-e2">
-              <div className="transform-[translateZ(30px)]">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted">{t.label}</span>
-                  <span className={`grid h-9 w-9 place-items-center rounded-xl bg-linear-to-br ${t.tone} text-white shadow-[0_8px_20px_-8px_var(--glow)]`}>
-                    <t.icon size={17} />
-                  </span>
+          <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))]">
+            {TILES.map((t, i) => (
+              <TiltCard key={t.key} tilt={10} radius="rounded-3xl" depth={24} inner="flex flex-col gap-[18px] p-[22px]"
+                className="animate-[cardIn_.7s_cubic-bezier(.22,1,.36,1)_backwards]" style={{ animationDelay: `${i * 0.07}s` }}>
+                <div className={`grid h-[42px] w-[42px] place-items-center rounded-[14px] ${t.tone}`}><t.icon size={20} /></div>
+                <div>
+                  <Counter value={data?.totals[t.key]} className="block text-[44px] font-bold leading-none tracking-[-0.05em]" />
+                  <div className="mt-1.5 text-sm text-muted">{t.label}</div>
                 </div>
-                {data
-                  ? <p className="mt-3 text-[clamp(1.8rem,1.4rem+1.5vw,2.6rem)] font-bold tracking-tight"><AnimatedNumber value={data.totals[t.key]} /></p>
-                  : <Skeleton className="mt-4 h-9 w-20" />}
+              </TiltCard>
+            ))}
+          </div>
+
+          <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,480px),1fr))]">
+            <div className={card} style={{ animationDelay: '.2s' }}>
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="text-lg font-bold tracking-[-0.02em]">Messages by room</div>
+                  <div className="mt-0.5 font-mono text-[11px] text-muted">$group by room_id → $lookup rooms</div>
+                </div>
+                <div className="flex gap-3.5 text-[13px] text-muted">
+                  <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-[3px] bg-accent" />Members</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-[3px] bg-accent-2" />Guests</span>
+                </div>
               </div>
-            </TiltCard>
-          </motion.div>
-        ))}
-      </div>
+              <ChartBox loading={!data} empty={data?.messages_per_room.length === 0}>
+                <BarChart key={round} data={data?.messages_per_room} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 6" stroke={css('border-strong')} vertical={false} />
+                  <XAxis dataKey="room" tick={{ fill: css('muted'), fontSize: 12 }} tickFormatter={(v) => `#${v}`} axisLine={false} tickLine={false} interval={0} />
+                  <YAxis allowDecimals={false} tick={{ fill: css('muted'), fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<Tip />} cursor={{ fill: css('accent-soft'), radius: 10 }} />
+                  <Bar dataKey="member" name="Members" stackId="a" fill={css('accent')} radius={[4, 4, 4, 4]} animationDuration={anim} maxBarSize={56} />
+                  <Bar dataKey="guest" name="Guests" stackId="a" fill={css('accent-2')} radius={[10, 10, 4, 4]} animationDuration={anim} maxBarSize={56} />
+                </BarChart>
+              </ChartBox>
+            </div>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <ChartCard title="Messages per room" subtitle="$group by room_id → $lookup rooms" loading={!data} empty={data?.messages_per_room.length === 0} delay={0.2}>
-          <BarChart data={data?.messages_per_room} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-            <Gradients />
-            <CartesianGrid strokeDasharray="3 6" stroke={css('border-strong')} vertical={false} />
-            <XAxis dataKey="room" tick={{ fill: css('muted'), fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis allowDecimals={false} tick={{ fill: css('muted'), fontSize: 12 }} axisLine={false} tickLine={false} />
-            <Tooltip content={<ChartTooltip />} cursor={{ fill: css('accent-soft'), radius: 8 }} />
-            <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
-            <Bar dataKey="member" name="Member" stackId="a" fill="url(#g-member)" animationDuration={900} maxBarSize={48} />
-            <Bar dataKey="guest" name="Guest" stackId="a" fill="url(#g-guest)" radius={[10, 10, 0, 0]} animationDuration={900} maxBarSize={48} />
-          </BarChart>
-        </ChartCard>
-
-        <ChartCard title="Uploads per user" subtitle="$group on fs.files metadata.user_id → $lookup users" loading={!data} empty={data?.uploads_per_user.length === 0} delay={0.28}>
-          <BarChart data={data?.uploads_per_user} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
-            <Gradients />
-            <CartesianGrid strokeDasharray="3 6" stroke={css('border-strong')} horizontal={false} />
-            <XAxis type="number" allowDecimals={false} tick={{ fill: css('muted'), fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="alias" width={100} tick={{ fill: css('muted'), fontSize: 12 }} axisLine={false} tickLine={false} />
-            <Tooltip content={<ChartTooltip />} cursor={{ fill: css('accent-soft'), radius: 8 }} />
-            <Bar dataKey="uploads" name="Uploads" fill="url(#g-uploads)" radius={[0, 10, 10, 0]} animationDuration={900} maxBarSize={36} />
-          </BarChart>
-        </ChartCard>
+            <div className={card} style={{ animationDelay: '.28s' }}>
+              <div className="mb-6">
+                <div className="text-lg font-bold tracking-[-0.02em]">Top picture sharers</div>
+                <div className="mt-0.5 font-mono text-[11px] text-muted">$group on fs.files metadata.user_id → $lookup users</div>
+              </div>
+              <ChartBox loading={!data} empty={data?.uploads_per_user.length === 0}>
+                <BarChart key={round} data={data?.uploads_per_user.slice(0, 8)} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="g-up" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={css('accent')} /><stop offset="100%" stopColor={css('accent-3')} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis type="number" allowDecimals={false} hide />
+                  <YAxis type="category" dataKey="alias" width={110} tick={{ fill: css('text'), fontSize: 14, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<Tip />} cursor={{ fill: css('accent-soft'), radius: 10 }} />
+                  <Bar dataKey="uploads" name="Pictures" fill="url(#g-up)" radius={[999, 999, 999, 999]} background={{ fill: css('surface-2'), radius: 999 }} animationDuration={anim} barSize={10} />
+                </BarChart>
+              </ChartBox>
+            </div>
+          </div>
+        </div>
       </div>
     </Page>
   )
 }
 
-function ChartCard({ title, subtitle, loading, empty, delay, children }) {
+function ChartBox({ loading, empty, children }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="glass ring-gradient rounded-3xl p-6 shadow-e2">
-      <h2 className="text-[17px] font-semibold tracking-tight">{title}</h2>
-      <p className="mt-0.5 font-mono text-[11px] text-muted">{subtitle}</p>
-      <div className="mt-5 h-72">
-        {loading ? <Skeleton className="h-full w-full" />
-          : empty ? <div className="grid h-full place-items-center text-sm text-muted">No data yet</div>
-          : <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer>}
-      </div>
-    </motion.div>
+    <div className="h-[260px]">
+      {loading ? <div className="h-full w-full animate-pulse rounded-2xl bg-surface-2" />
+        : empty ? <div className="grid h-full place-items-center text-sm text-muted">No data yet</div>
+        : <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer>}
+    </div>
   )
 }
 
-function ChartTooltip({ active, payload, label }) {
+function Tip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="glass rounded-2xl px-3.5 py-2.5 text-xs shadow-e3">
-      <p className="mb-1 font-semibold text-text">{label}</p>
+    <div className="rounded-2xl border border-border-strong bg-surface-solid px-3.5 py-2.5 text-xs shadow-e3">
+      <p className="m-0 mb-1 font-semibold text-text">{payload[0].payload.room ? `#${label}` : label}</p>
       {payload.map((p) => (
-        <p key={p.dataKey} className="flex items-center gap-2 text-muted">
-          <span className="h-2 w-2 rounded-full" style={{ background: p.dataKey === 'guest' ? 'var(--accent-3)' : p.dataKey === 'uploads' ? 'var(--accent-2)' : 'var(--accent)' }} />
+        <p key={p.dataKey} className="m-0 flex items-center gap-2 text-muted">
+          <span className="h-2 w-2 rounded-full" style={{ background: p.dataKey === 'guest' ? 'var(--accent-2)' : 'var(--accent)' }} />
           {p.name}: <b className="text-text">{p.value}</b>
         </p>
       ))}

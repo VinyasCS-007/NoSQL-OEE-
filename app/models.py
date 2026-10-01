@@ -12,6 +12,13 @@ class RoomOut(BaseModel):
     id: str
     name: str
     created_at: datetime
+    online: int = 0  # live count from the WebSocket manager, not stored
+
+
+class ReplyOut(BaseModel):
+    id: str
+    alias: str
+    text: str
 
 
 class SenderOut(BaseModel):
@@ -25,6 +32,8 @@ class MessageOut(BaseModel):
     sender: SenderOut  # user_id is left out on purpose: users stay anonymous
     text: str
     image_file_id: str | None = None
+    reply_to: str | None = None  # id of the message being answered (reference)
+    reply: ReplyOut | None = None  # resolved at read time; None if the original expired
     created_at: datetime
 
 

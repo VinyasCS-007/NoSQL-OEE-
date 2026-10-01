@@ -71,7 +71,17 @@ The benchmark used 100,000 messages in 50 rooms and 20,000 users, on a local Mon
 - **Messages per room:** a `$group` by `room_id` counts all messages, plus guest and member counts using `$cond`. Then `$lookup` rooms joins the room name, followed by `$project` and `$sort`.
 - **Uploads per user:** a `$group` on `fs.files` by `metadata.user_id` counts uploads and sums bytes. Then `$lookup` users projects **only the alias**, never the email.
 
-## 7. Designed for later (not built)
+## 7. Replies, typing and presence (added after the spec)
+
+- **Replies are a reference, not an embed.** `messages.reply_to` stores the original message's ObjectId; the `$jsonSchema` validator allows it as an optional `objectId`.
+  - When a history page loads, all its replies are resolved with a single `$in` query rather than one lookup per message, and the API returns `reply: {id, alias, text}`.
+  - A reply must be in the same room as the original. If the original was a guest message that the TTL index has since deleted, `reply` is `null`. Embedding a copy would have kept a guest's text alive past its 24 h expiry, which defeats the point of the TTL.
+- **Typing and presence are never stored.** They live in memory in `ws.py`.
+  - Typing pings are relayed to the other sockets in the room.
+  - Presence counts unique aliases per room, so one person with two tabs counts once. It is pushed only to sockets that connect with `?presence=1`, and is also available from `GET /presence`, the `online` field on `/rooms` and the `/stats` totals.
+- **Scope note:** PROJECT_SPEC lists presence as out of scope; it was added on request. It is correct for a single server process. With several processes it would move to Redis pub/sub, the same swap planned for rate limiting.
+
+## 8. Designed for later (not built)
 
 - **Sharding:** `room_id` is on every message and leads the compound index, making it the natural shard key.
 - **Rate limiting:** every WebSocket message goes through `ratelimit.check_rate_limit()`, a no-op today. A Redis counter can replace it without touching the chat code.

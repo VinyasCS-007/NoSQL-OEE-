@@ -1,5 +1,6 @@
 """Aggregation pipelines for the dashboard."""
 from app.db import get_db
+from app.ws import manager
 
 
 async def messages_per_room() -> list[dict]:
@@ -38,4 +39,5 @@ async def totals() -> dict:
         "messages": await db.messages.count_documents({}),
         "members": await db.users.count_documents({}),
         "uploads": await db["fs.files"].count_documents({}),
+        "online": manager.total_online(),  # live, from open WebSockets
     }

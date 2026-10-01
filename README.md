@@ -86,7 +86,7 @@ npm run dev                 # http://localhost:5173
 ### 3. Tests
 
 ```bash
-pytest                      # 18 tests: rooms, pagination, schema validation, auth, WebSocket, GridFS, stats
+pytest                      # 22 tests: rooms, pagination, schema validation, auth, WebSocket, GridFS, stats, replies, typing, presence
 ```
 
 ### 4. Index benchmark
@@ -104,13 +104,14 @@ Saves `explain("executionStats")` JSON for each query with and without its index
 | POST | `/guest` | anyone | random alias + 24 h guest token |
 | POST | `/register` | anyone | create member (409 if email exists) |
 | POST | `/login` | anyone | member token |
-| GET | `/rooms` | anyone | list rooms |
+| GET | `/rooms` | anyone | list rooms, each with its live `online` count |
 | POST | `/rooms` | anyone | create room (409 on duplicate name) |
-| GET | `/rooms/{id}/messages?before=&limit=&q=` | anyone | history, newest first; `before` = oldest message id seen; `q` = text search |
-| WS | `/ws/{room_id}?token=` | guest or member | send `{"text", "image_file_id?"}`, receive `{"type":"message", ...}` |
+| GET | `/rooms/{id}/messages?before=&limit=&q=` | anyone | history, newest first; `before` = oldest message id seen; `q` = text search. Each message carries `reply_to` and a resolved `reply: {id, alias, text}` (`null` if the original expired) |
+| WS | `/ws/{room_id}?token=&presence=1` | guest or member | send `{"text", "image_file_id?", "reply_to?"}`, receive `{"type":"message", ...}`. `{"type":"typing"}` is relayed to the rest of the room. With `presence=1` you also receive `{"type":"presence","online":n}` |
+| GET | `/presence` | anyone | live `{online, rooms}` counts from open WebSockets (in memory, never stored) |
 | POST | `/upload` | members | JPEG/PNG/WebP ≤ 5 MB → re-encoded → GridFS, returns `file_id` |
 | GET | `/image/{file_id}` | anyone | streams the image from GridFS |
-| GET | `/stats` | anyone | totals, messages per room, uploads per user |
+| GET | `/stats` | anyone | totals (incl. `online`), messages per room, uploads per user |
 
 ## Deployment (later)
 

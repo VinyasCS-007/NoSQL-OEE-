@@ -14,7 +14,7 @@ from app import db, images, stats
 from app.auth import (create_token, decode_token, hash_password, random_alias, require_member,
                       sender_from_identity, verify_password)
 from app.config import settings
-from app.messages import get_history, message_out, save_message
+from app.messages import find_reply_target, get_history, message_out, resolve_replies, save_message
 from app.models import (LoginIn, MessagePage, RegisterIn, RoomCreate, RoomOut, TokenOut,
                         UploadOut)
 from app.ratelimit import check_rate_limit
@@ -45,7 +45,8 @@ def to_object_id(value: str, what: str = "Item") -> ObjectId:
 
 
 def room_out(doc: dict) -> dict:
-    return {"id": str(doc["_id"]), "name": doc["name"], "created_at": doc["created_at"]}
+    rid = str(doc["_id"])
+    return {"id": rid, "name": doc["name"], "created_at": doc["created_at"], "online": manager.online(rid)}
 
 
 @app.get("/health")
@@ -129,9 +130,17 @@ async def room_messages(
         if not cursor_doc:
             raise HTTPException(404, "Message not found")
     docs = await get_history(oid, cursor_doc, limit, search=q or None)
+    replies = await resolve_replies(docs)
     # a full page means there may be older messages
     next_before = str(docs[-1]["_id"]) if len(docs) == limit else None
-    return {"messages": [message_out(d) for d in docs], "next_before": next_before}
+    return {"messages": [message_out(d, replies.get(d.get("reply_to"))) for d in docs],
+            "next_before": next_before}
+
+
+@app.get("/presence")
+async def presence():
+    # in-memory count of open sockets; nothing is written to MongoDB
+    return {"online": manager.total_online(), "rooms": manager.snapshot()}
 
 
 # ---------- images (GridFS) ----------
@@ -178,7 +187,7 @@ async def get_stats():
 # ---------- live chat ----------
 
 @app.websocket("/ws/{room_id}")
-async def chat_socket(ws: WebSocket, room_id: str, token: str = ""):
+async def chat_socket(ws: WebSocket, room_id: str, token: str = "", presence: int = 0):
     # Browsers can't set headers on WebSockets, so the token comes as ?token=
     try:
         identity = decode_token(token)
@@ -190,12 +199,26 @@ async def chat_socket(ws: WebSocket, room_id: str, token: str = ""):
         await ws.close(code=4404)
         return
 
-    await manager.connect(room_id, ws)
+    await manager.connect(room_id, ws, identity["alias"], presence=bool(presence))
+    await manager.broadcast_presence(room_id)
     try:
         while True:
             data = await ws.receive_json()
+            # typing is relayed to everyone else in the room and never stored
+            if data.get("type") == "typing":
+                await manager.broadcast(room_id, {"type": "typing", "alias": identity["alias"]}, exclude=ws)
+                continue
             text = str(data.get("text", "")).strip()[:2000]
             image_id = data.get("image_file_id")
+            reply_doc = None
+            if data.get("reply_to"):
+                try:
+                    reply_doc = await find_reply_target(oid, ObjectId(data["reply_to"]))
+                except (InvalidId, TypeError):
+                    reply_doc = None
+                if not reply_doc:
+                    await ws.send_json({"type": "error", "detail": "That message is no longer available"})
+                    continue
 
             if image_id:
                 # only members can post images, and only images they uploaded
@@ -215,11 +238,13 @@ async def chat_socket(ws: WebSocket, room_id: str, token: str = ""):
                 await ws.send_json({"type": "error", "detail": "Slow down"})
                 continue
 
-            doc = await save_message(oid, sender_from_identity(identity), text, image_id)
-            out = message_out(doc)
+            doc = await save_message(oid, sender_from_identity(identity), text, image_id,
+                                     reply_doc["_id"] if reply_doc else None)
+            out = message_out(doc, reply_doc)
             out["created_at"] = out["created_at"].isoformat()
             await manager.broadcast(room_id, {"type": "message", "message": out})
     except (WebSocketDisconnect, ValueError):
         pass
     finally:
         manager.disconnect(room_id, ws)
+        await manager.broadcast_presence(room_id)

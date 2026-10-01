@@ -4,12 +4,14 @@ import { WS_URL } from '../lib/api'
 /**
  * Opens a WebSocket for one room and reconnects with backoff if it drops.
  * status: 'connecting' | 'open' | 'closed'
+ * Events: message, error, typing (someone else is typing), presence (people in the room).
  */
-export function useChatSocket(roomId, token, { onMessage, onError, onUnauthorized }) {
+export function useChatSocket(roomId, token, { onMessage, onError, onUnauthorized, onTyping, onPresence }) {
   const [status, setStatus] = useState('connecting')
   const wsRef = useRef(null)
-  const handlers = useRef({ onMessage, onError, onUnauthorized })
-  handlers.current = { onMessage, onError, onUnauthorized }
+  const handlers = useRef({})
+  handlers.current = { onMessage, onError, onUnauthorized, onTyping, onPresence }
+  const lastTyping = useRef(0)
 
   useEffect(() => {
     if (!roomId || !token) return
@@ -19,13 +21,17 @@ export function useChatSocket(roomId, token, { onMessage, onError, onUnauthorize
 
     const open = () => {
       setStatus('connecting')
-      const ws = new WebSocket(`${WS_URL}/ws/${roomId}?token=${encodeURIComponent(token)}`)
+      // presence=1 asks the server to push live "people online" counts
+      const ws = new WebSocket(`${WS_URL}/ws/${roomId}?token=${encodeURIComponent(token)}&presence=1`)
       wsRef.current = ws
       ws.onopen = () => { retry = 0; setStatus('open') }
       ws.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        if (data.type === 'message') handlers.current.onMessage?.(data.message)
-        else if (data.type === 'error') handlers.current.onError?.(data.detail)
+        const h = handlers.current
+        if (data.type === 'message') h.onMessage?.(data.message)
+        else if (data.type === 'typing') h.onTyping?.(data.alias)
+        else if (data.type === 'presence') h.onPresence?.(data.online)
+        else if (data.type === 'error') h.onError?.(data.detail)
       }
       ws.onclose = (e) => {
         setStatus('closed')
@@ -54,5 +60,13 @@ export function useChatSocket(roomId, token, { onMessage, onError, onUnauthorize
     return false
   }, [])
 
-  return { status, send }
+  // throttled: at most one typing ping every 2.5 s
+  const typing = useCallback(() => {
+    const now = Date.now()
+    if (now - lastTyping.current < 2500) return
+    lastTyping.current = now
+    send({ type: 'typing' })
+  }, [send])
+
+  return { status, send, typing }
 }

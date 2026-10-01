@@ -1,182 +1,174 @@
-import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
-import { Moon, Sparkles, Sun, UserRound } from 'lucide-react'
-import { useRef } from 'react'
-import { useTheme } from '../hooks/useTheme'
+import { ArrowLeft, Moon, SlidersHorizontal, Sun } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { avatarBg, initials } from '../lib/format'
+import { useSettings } from '../hooks/useSettings'
 
-const spring = { type: 'spring', stiffness: 420, damping: 26 }
-
-const variants = {
-  primary:
-    'bg-brand text-on-accent shadow-[0_10px_30px_-10px_var(--glow),inset_0_1px_0_rgb(255_255_255/0.25)] hover:shadow-[0_16px_40px_-10px_var(--glow),inset_0_1px_0_rgb(255_255_255/0.3)]',
-  ghost: 'bg-transparent text-text hover:bg-surface-2',
-  outline: 'glass text-text shadow-e1 hover:border-border-strong hover:shadow-e2',
-}
-
-/**
- * Primary call-to-action button. Magnetic: it leans toward the cursor, and the primary variant has a light sheen that sweeps across on hover. Variants: primary (brand gradient), outline (glass), ghost.
- * @category Actions
- */
-export function Button({ variant = 'primary', className = '', children, magnetic = true, ...props }) {
-  const ref = useRef(null)
-  const reduce = useReducedMotion()
-  const x = useSpring(useMotionValue(0), { stiffness: 300, damping: 20 })
-  const y = useSpring(useMotionValue(0), { stiffness: 300, damping: 20 })
-
-  const onMove = (e) => {
-    if (!magnetic || reduce || props.disabled) return
-    const r = ref.current.getBoundingClientRect()
-    x.set((e.clientX - r.left - r.width / 2) * 0.18)
-    y.set((e.clientY - r.top - r.height / 2) * 0.28)
-  }
-  const reset = () => { x.set(0); y.set(0) }
-
+/** Chat-bubble brand mark (three dots). size in px. */
+export function Mark({ size = 30, className = '' }) {
+  const dot = Math.max(3.5, size * 0.13)
   return (
-    <motion.button
-      ref={ref}
-      style={{ x, y }}
-      onPointerMove={onMove}
-      onPointerLeave={reset}
-      whileTap={{ scale: props.disabled ? 1 : 0.96 }}
-      transition={spring}
-      className={`group relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-2xl px-5 py-2.5
-        text-sm font-semibold tracking-tight transition-[box-shadow,background-color,border-color] duration-300
-        disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
-      {...props}
-    >
-      {variant === 'primary' && (
-        <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 -translate-x-[120%] bg-linear-to-r from-transparent via-white/35 to-transparent group-hover:animate-[sheen_0.9s_ease]" />
-      )}
-      <span className="relative inline-flex items-center gap-2">{children}</span>
-    </motion.button>
+    <span className={`bg-mark flex shrink-0 items-center justify-center shadow-[0_6px_16px_-4px_var(--glow),inset_0_1px_0_rgb(255_255_255/.35)] ${className}`}
+      style={{ width: size, height: size, gap: dot * 0.75, borderRadius: `${size * 0.36}px ${size * 0.36}px ${size * 0.36}px ${size * 0.13}px` }}>
+      {[0, 1, 2].map((i) => <span key={i} className="rounded-full bg-white" style={{ width: dot, height: dot }} />)}
+    </span>
   )
 }
 
-/**
- * Square 40px icon-only button with hover and tap feedback. Always pass `label`; it becomes aria-label and title.
- * @category Actions
- */
-export function IconButton({ label, className = '', children, ...props }) {
+export function Logo({ size = 30, onClick }) {
   return (
-    <motion.button
-      whileHover={{ scale: 1.06 }}
-      whileTap={{ scale: 0.9 }}
-      transition={spring}
-      aria-label={label}
-      title={label}
-      className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-muted transition-colors
-        hover:bg-surface-2 hover:text-text disabled:opacity-40 ${className}`}
-      {...props}
-    >
+    <button type="button" onClick={onClick} className="flex cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-text">
+      <Mark size={size} />
+      <span className="text-[20px] font-extrabold tracking-[-0.04em]">anon</span>
+    </button>
+  )
+}
+
+export function IconBtn({ label, children, className = '', solid = false, ...props }) {
+  return (
+    <button type="button" aria-label={label} title={label}
+      className={`springy grid h-[42px] w-[42px] shrink-0 cursor-pointer place-items-center rounded-full border border-border text-text active:scale-[.85] ${solid ? 'bg-surface' : 'bg-surface-2'} ${className}`}
+      {...props}>
       {children}
-    </motion.button>
+    </button>
   )
 }
 
-/**
- * Labelled text input with a soft accent focus glow. Pass `id` and `label`; every other prop goes to the <input>.
- * @category Forms
- */
-export function Input({ label, id, ...props }) {
+export function ThemeToggle(props) {
+  const { dark, toggleTheme } = useSettings()
+  return <IconBtn label="Toggle theme" onClick={toggleTheme} {...props}>{dark ? <Sun size={18} /> : <Moon size={18} />}</IconBtn>
+}
+
+export function SettingsBtn(props) {
+  const { openPanel } = useSettings()
+  return <IconBtn label="Settings" onClick={openPanel} {...props}><SlidersHorizontal size={18} /></IconBtn>
+}
+
+export function BackBtn({ onClick }) {
   return (
-    <label htmlFor={id} className="group block">
-      <span className="mb-1.5 block text-[13px] font-medium text-muted transition-colors group-focus-within:text-accent">{label}</span>
-      <input
-        id={id}
-        className="w-full rounded-2xl border border-border bg-surface-2 px-4 py-3 text-sm text-text shadow-e1 outline-none
-          transition-all duration-200 placeholder:text-muted/60 hover:border-border-strong
-          focus:border-accent focus:bg-surface-solid focus:shadow-[0_0_0_4px_var(--accent-soft),0_8px_24px_-12px_var(--glow)]"
-        {...props}
-      />
-    </label>
+    <button type="button" onClick={onClick}
+      className="springy glass inline-flex h-[42px] cursor-pointer items-center gap-2 rounded-full pl-3 pr-4 text-sm font-semibold text-text active:scale-90">
+      <ArrowLeft size={16} strokeWidth={2.2} />Back
+    </button>
   )
 }
 
-/**
- * Small pill that marks a user as Guest (amber) or Member (green). Shown next to aliases.
- * @category Display
- */
-export function RoleBadge({ type, className = '' }) {
+export function RoleBadge({ type }) {
   const guest = type === 'guest'
-  const Icon = guest ? UserRound : Sparkles
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset
-        ${guest ? 'bg-guest-soft text-guest ring-guest/25' : 'bg-member-soft text-member ring-member/25'} ${className}`}
-    >
-      <Icon size={10} strokeWidth={2.75} aria-hidden />
+    <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[.06em] ${guest ? 'bg-guest-soft text-guest' : 'bg-member-soft text-member'}`}>
       {guest ? 'Guest' : 'Member'}
     </span>
   )
 }
 
-/**
- * Light/dark theme switch. Toggles the `dark` class on <html> and remembers the choice in localStorage; the sun/moon icon flips over in 3D.
- * @category Actions
- */
-export function ThemeToggle() {
-  const [dark, toggle] = useTheme()
+export function Avatar({ alias, size = 34, radius = 12, className = '' }) {
   return (
-    <IconButton label={dark ? 'Switch to light theme' : 'Switch to dark theme'} onClick={toggle} className="perspective-[400px]">
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.span
-          key={dark ? 'moon' : 'sun'}
-          initial={{ rotateY: -90, opacity: 0, scale: 0.6 }}
-          animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-          exit={{ rotateY: 90, opacity: 0, scale: 0.6 }}
-          transition={{ duration: 0.22 }}
-          className="grid place-items-center"
-        >
-          {dark ? <Moon size={18} /> : <Sun size={18} />}
-        </motion.span>
-      </AnimatePresence>
-    </IconButton>
+    <div className={`grid shrink-0 place-items-center font-bold text-white ${className}`}
+      style={{ width: size, height: size, borderRadius: radius, background: avatarBg(alias), fontSize: Math.round(size * 0.35) }}>
+      {initials(alias)}
+    </div>
   )
 }
 
-/**
- * Whisper brand mark: gradient chat-bubble tile plus wordmark. `compact` hides the wordmark.
- * @category Brand
- */
-export function Logo({ className = '', compact = false }) {
+export function LivePing({ className = 'bg-member', size = 8 }) {
   return (
-    <span className={`inline-flex items-center gap-2.5 font-bold tracking-tight ${className}`}>
-      <motion.span
-        whileHover={{ rotate: -8, scale: 1.08 }}
-        transition={spring}
-        className="relative grid h-9 w-9 place-items-center rounded-[12px] bg-brand text-on-accent shadow-[0_8px_24px_-8px_var(--glow),inset_0_1px_0_rgb(255_255_255/0.35)]"
-      >
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent-2 ring-2 ring-bg" />
-      </motion.span>
-      {!compact && <span className="text-[17px]">Whisper</span>}
+    <span className="relative inline-block shrink-0" style={{ width: size, height: size }}>
+      <span className={`absolute inset-0 rounded-full animate-[ping_1.6s_cubic-bezier(0,0,.2,1)_infinite] ${className}`} />
+      <span className={`absolute inset-0 rounded-full ${className}`} />
     </span>
   )
 }
 
-/**
- * Shimmering loading placeholder. Size and shape it with className (e.g. `h-4 w-32`, `rounded-full`).
- * @category Feedback
- */
-export function Skeleton({ className = '', ...props }) {
-  return <div className={`shimmer rounded-xl ${className}`} {...props} />
+export function TypingDots({ size = 6, color = 'bg-muted' }) {
+  return (
+    <span className="flex gap-1">
+      {[0, 0.15, 0.3].map((d) => (
+        <span key={d} className={`rounded-full ${color} animate-[typing_1.2s_infinite]`} style={{ width: size, height: size, animationDelay: `${d}s` }} />
+      ))}
+    </span>
+  )
+}
+
+/** Number that counts up (expo-out) the first time it scrolls into view, and again when value changes. */
+export function Counter({ value, suffix = '', className = '' }) {
+  const ref = useRef(null)
+  const shown = useRef(0)
+  const [seen, setSeen] = useState(false)
+  const { motion: motionOn } = useSettings()
+
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setSeen(true), { threshold: 0.2 })
+    ref.current && io.observe(ref.current)
+    return () => io.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el || !seen || value == null) return
+    const from = shown.current, to = Number(value)
+    const paint = (v) => { shown.current = v; el.textContent = Math.round(v).toLocaleString('en-US') + suffix }
+    if (!motionOn) return paint(to)
+    let raf, t0 = performance.now()
+    const f = (now) => {
+      const p = Math.min(1, (now - t0) / 1400), e = p === 1 ? 1 : 1 - Math.pow(2, -10 * p)
+      paint(from + (to - from) * e)
+      if (p < 1) raf = requestAnimationFrame(f)
+    }
+    raf = requestAnimationFrame(f)
+    return () => cancelAnimationFrame(raf)
+  }, [seen, value, suffix, motionOn])
+
+  return <span ref={ref} className={`tabular-nums ${className}`}>0{suffix}</span>
+}
+
+/** Glass card with cursor tilt + glare (handled globally by <Fx/> through data-tilt / data-glare). */
+export function TiltCard({ tilt = 10, radius = 'rounded-[26px]', className = '', inner = '', depth = 26, onClick, children, style }) {
+  return (
+    <div data-tilt={tilt} onClick={onClick} style={style}
+      className={`relative [transform-style:preserve-3d] ${radius} ${onClick ? 'cursor-pointer active:scale-[.97]' : ''} ${className}`}>
+      <div className="glass absolute inset-0 rounded-[inherit] shadow-e2" />
+      <div data-glare="" className="pointer-events-none absolute inset-0 rounded-[inherit]" />
+      <div className={`relative h-full ${inner}`} style={{ transform: `translateZ(${depth}px)` }}>{children}</div>
+    </div>
+  )
 }
 
 /**
- * Route wrapper that fades, lifts and un-blurs its content on enter, and reverses on exit. Use as the root element of a page.
- * @category Layout
+ * Route wrapper: the page swings in on a slight 3D tilt. Uses the Web Animations API with no
+ * fill, so no transform/filter is left behind (either would trap position:fixed children).
  */
 export function Page({ children, className = '' }) {
+  const { motion: on } = useSettings()
+  const ref = useRef(null)
+  useLayoutEffect(() => {
+    if (!on || !ref.current) return
+    ref.current.animate(
+      [{ opacity: 0, transform: 'perspective(1400px) translateY(18px) rotateX(4deg) scale(.985)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }],
+      { duration: 480, easing: 'cubic-bezier(.22,1,.36,1)' })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  return <div ref={ref} className={className}>{children}</div>
+}
+
+export function Aurora() {
   return (
-    <motion.main
-      initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
-      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      exit={{ opacity: 0, y: -8, filter: 'blur(4px)' }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className={className}
-    >
-      {children}
-    </motion.main>
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <div className="absolute -left-[15%] -top-[25%] h-[70vmax] w-[70vmax] rounded-full blur-[110px] animate-[aurora_22s_ease-in-out_infinite]"
+        style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 62%)', opacity: 'calc(.28 * var(--aurora))' }} />
+      <div className="absolute -right-[20%] top-[5%] h-[60vmax] w-[60vmax] rounded-full blur-[120px] animate-[aurora_26s_ease-in-out_infinite_reverse]"
+        style={{ background: 'radial-gradient(circle, var(--accent-2) 0%, transparent 60%)', opacity: 'calc(.2 * var(--aurora))' }} />
+      <div className="absolute -bottom-[30%] left-[25%] h-[55vmax] w-[55vmax] rounded-full blur-[120px] animate-[aurora_30s_ease-in-out_infinite]"
+        style={{ background: 'radial-gradient(circle, var(--accent-3) 0%, transparent 60%)', opacity: 'calc(.16 * var(--aurora))' }} />
+      <div className="bg-grid absolute inset-0" />
+    </div>
+  )
+}
+
+export function Toast() {
+  const { toastMsg } = useSettings()
+  if (!toastMsg) return null
+  return (
+    <div role="status" className="fixed bottom-[max(20px,env(safe-area-inset-bottom))] left-1/2 z-[90] max-w-[calc(100vw-32px)] rounded-2xl bg-text px-[18px] py-3 text-sm font-medium text-bg shadow-e3 animate-[toastIn_.4s_cubic-bezier(.34,1.56,.64,1)_both]">
+      {toastMsg}
+    </div>
   )
 }

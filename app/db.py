@@ -75,6 +75,9 @@ MESSAGES_SCHEMA = {
         "text": {"bsonType": "string", "maxLength": 2000},
         # images are referenced (GridFS), never embedded: they are large
         "image_file_id": {"bsonType": "objectId"},
+        # replies reference the original message by _id instead of copying it:
+        # edits stay in one place and a TTL-deleted original simply resolves to nothing
+        "reply_to": {"bsonType": "objectId"},
         "created_at": {"bsonType": "date"},
         # only guest messages have this; the TTL index deletes them after it passes
         "expires_at": {"bsonType": "date"},
