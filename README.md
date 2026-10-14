@@ -1,4 +1,4 @@
-# Whisper — Anonymous Web Chat (NoSQL OEE, BISNS701)
+# Anon — Anonymous Web Chat (NoSQL OEE, BISNS701)
 
 A free real-time chat app. Anyone can join public rooms as a **guest** (random alias, messages auto-expire), or **register** to upload pictures and keep their messages. Built to demonstrate MongoDB: `$jsonSchema` validation, unique / compound / TTL / text indexes, `explain()`, aggregation pipelines and GridFS.
 
